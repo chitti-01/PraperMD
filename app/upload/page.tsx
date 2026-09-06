@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Subject, ExamType, QuestionPaper } from '@/lib/types';
 import MultiFileUpload from '@/components/MultiFileUpload';
+import { compressImageFile, calculateClientFileHash } from '@/lib/image-optimizer';
 import { CheckCircle2, AlertTriangle, ArrowRight, Upload, FileText, Camera } from 'lucide-react';
 
 export default function UploadPage() {
@@ -23,6 +24,7 @@ export default function UploadPage() {
 
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState('');
   const [duplicateAlert, setDuplicateAlert] = useState<{ message: string; existingPaperId?: string } | null>(null);
   const [publishedPaper, setPublishedPaper] = useState<QuestionPaper | null>(null);
@@ -67,57 +69,124 @@ export default function UploadPage() {
       return;
     }
 
+    // Pre-upload file size validation (max 50MB per file)
+    const MAX_MB = 50;
+    const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
+    if (totalBytes > MAX_MB * 1024 * 1024) {
+      setError(`Total upload size (${(totalBytes / (1024 * 1024)).toFixed(1)}MB) exceeds the maximum ${MAX_MB}MB limit. Please compress your PDF or select fewer pages.`);
+      return;
+    }
+
     setSubmitting(true);
+    setStatusMessage('Preparing & optimizing document...');
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('subject_id', subjectId);
-      formData.append('exam_type_id', examTypeId);
-      formData.append('mbbs_year', mbbsYear);
-      formData.append('semester', semester);
-      formData.append('exam_year', examYear);
-      formData.append('academic_year', academicYear);
-      formData.append('description', description);
+      // 1. Client-Side Image Compression & Hash Calculation
+      const primaryFile = files[0];
+      let processedFile = primaryFile;
 
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      let data;
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const textText = await res.text();
-        if (res.status === 413) {
-          throw new Error('File size exceeds server payload limits (413 Request Entity Too Large). Please compress your PDF or reduce page count.');
-        }
-        throw new Error(`Upload server error (${res.status}). ${textText.substring(0, 100) || 'Please try again.'}`);
+      if (primaryFile.type.startsWith('image/')) {
+        setStatusMessage('Compressing image for legibility...');
+        processedFile = await compressImageFile(primaryFile, 2000, 0.82);
       }
 
-      if (res.status === 409) {
+      setStatusMessage('Checking for duplicate papers...');
+      const fileHash = await calculateClientFileHash(processedFile);
+
+      // 2. Initialize Direct Upload API Request
+      setStatusMessage('Initializing secure upload...');
+      const initRes = await fetch('/api/upload/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          subject_id: subjectId,
+          exam_type_id: examTypeId,
+          mbbs_year: mbbsYear,
+          semester,
+          exam_year: Number(examYear),
+          academic_year: academicYear,
+          description,
+          file_name: processedFile.name,
+          file_size: processedFile.size,
+          file_type: processedFile.type,
+          file_hash: fileHash,
+          page_count: files.length,
+        }),
+      });
+
+      let initData;
+      const contentType = initRes.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        initData = await initRes.json();
+      } else {
+        const errText = await initRes.text();
+        throw new Error(`Server returned non-JSON response (${initRes.status}). ${errText.substring(0, 100)}`);
+      }
+
+      if (initRes.status === 409 || initData.isDuplicate) {
         setDuplicateAlert({
-          message: data.error,
-          existingPaperId: data.existingPaperId,
+          message: initData.error?.message || 'Exact duplicate paper detected.',
+          existingPaperId: initData.existingPaperId,
         });
+        setSubmitting(false);
         return;
       }
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to publish question paper');
+      if (!initRes.ok || !initData.success) {
+        throw new Error(initData.error?.message || 'Failed to initialize paper upload.');
       }
 
-      setPublishedPaper(data.paper);
+      const { directUpload, signedUrl, storagePath, paperData } = initData;
+
+      // 3. Perform Direct Storage Upload if signedUrl is provided (bypasses Vercel 4.5MB API payload limit!)
+      if (directUpload && signedUrl) {
+        setStatusMessage('Uploading document directly to storage archive...');
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': processedFile.type || 'application/pdf',
+          },
+          body: processedFile,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Direct storage upload failed with status ${uploadRes.status}. Please try again.`);
+        }
+      }
+
+      // 4. Complete database insertion atomically
+      setStatusMessage('Finalizing paper record in GMC repository...');
+      const completeRes = await fetch('/api/upload/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storagePath,
+          paperData,
+          directUpload,
+        }),
+      });
+
+      let completeData;
+      const compContentType = completeRes.headers.get('content-type') || '';
+      if (compContentType.includes('application/json')) {
+        completeData = await completeRes.json();
+      } else {
+        const text = await completeRes.text();
+        throw new Error(`Completion server error (${completeRes.status}): ${text.substring(0, 100)}`);
+      }
+
+      if (!completeRes.ok || !completeData.success) {
+        throw new Error(completeData.error?.message || 'Failed to publish paper metadata.');
+      }
+
+      setPublishedPaper(completeData.paper);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'An error occurred during submission.');
+      console.error('Upload Error:', err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred during submission.');
     } finally {
       setSubmitting(false);
+      setStatusMessage('');
     }
   };
 
@@ -354,7 +423,7 @@ export default function UploadPage() {
             className="btn btn-primary btn-lg w-full"
           >
             <Upload className="w-5 h-5" />
-            {submitting ? 'Optimizing & Publishing...' : 'Publish Question Paper'}
+            {submitting ? (statusMessage || 'Publishing Paper...') : 'Publish Question Paper'}
           </button>
         </div>
       </form>

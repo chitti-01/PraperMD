@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Subject, ExamType, QuestionPaper } from '@/lib/types';
+import { calculateClientFileHash } from '@/lib/image-optimizer';
 import {
   Camera,
   RotateCcw,
@@ -305,54 +306,96 @@ export default function ScanPage() {
     setSubmitting(true);
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('subject_id', subjectId);
-      formData.append('exam_type_id', examTypeId);
-      formData.append('mbbs_year', mbbsYear);
-      formData.append('semester', semester);
-      formData.append('exam_year', examYear);
-      formData.append('academic_year', academicYear);
-      formData.append('description', description);
-
-      // Convert scanned blobs into File objects
-      pages.forEach((page, idx) => {
-        const file = new File([page.blob], `scanned_page_${idx + 1}.jpg`, {
-          type: 'image/jpeg',
-        });
-        formData.append('files', file);
+      const primaryFile = new File([pages[0].blob], `scanned_paper_page_1.jpg`, {
+        type: 'image/jpeg',
       });
 
-      const res = await fetch('/api/upload', {
+      const fileHash = await calculateClientFileHash(primaryFile);
+      const totalSize = pages.reduce((acc, p) => acc + p.blob.size, 0);
+
+      // Initialize Direct Upload API Request
+      const initRes = await fetch('/api/upload/init', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          subject_id: subjectId,
+          exam_type_id: examTypeId,
+          mbbs_year: mbbsYear,
+          semester,
+          exam_year: Number(examYear),
+          academic_year: academicYear,
+          description,
+          file_name: `scanned_paper_${Date.now()}.jpg`,
+          file_size: totalSize,
+          file_type: 'image/jpeg',
+          file_hash: fileHash,
+          page_count: pages.length,
+        }),
       });
 
-      let data;
-      const contentType = res.headers.get('content-type') || '';
+      let initData;
+      const contentType = initRes.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
-        data = await res.json();
+        initData = await initRes.json();
       } else {
-        const textText = await res.text();
-        if (res.status === 413) {
-          throw new Error('Scanned images total size exceeds server limit (413 Request Entity Too Large). Please reduce number of pages or retake.');
-        }
-        throw new Error(`Upload server error (${res.status}). ${textText.substring(0, 100) || 'Please try again.'}`);
+        const textText = await initRes.text();
+        throw new Error(`Server returned non-JSON response (${initRes.status}). ${textText.substring(0, 100)}`);
       }
 
-      if (res.status === 409) {
+      if (initRes.status === 409 || initData.isDuplicate) {
         setDuplicateAlert({
-          message: data.error,
-          existingPaperId: data.existingPaperId,
+          message: initData.error?.message || 'Exact duplicate scanned paper detected.',
+          existingPaperId: initData.existingPaperId,
         });
+        setSubmitting(false);
         return;
       }
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to publish question paper');
+      if (!initRes.ok || !initData.success) {
+        throw new Error(initData.error?.message || 'Failed to initialize paper upload.');
       }
 
-      setPublishedPaper(data.paper);
+      const { directUpload, signedUrl, storagePath, paperData } = initData;
+
+      // Direct Upload to Storage if signedUrl is provided
+      if (directUpload && signedUrl) {
+        const uploadRes = await fetch(signedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'image/jpeg' },
+          body: primaryFile,
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Direct storage upload failed with status ${uploadRes.status}. Please try again.`);
+        }
+      }
+
+      // Complete paper publishing
+      const completeRes = await fetch('/api/upload/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storagePath,
+          paperData,
+          directUpload,
+        }),
+      });
+
+      let completeData;
+      const compContentType = completeRes.headers.get('content-type') || '';
+      if (compContentType.includes('application/json')) {
+        completeData = await completeRes.json();
+      } else {
+        const text = await completeRes.text();
+        throw new Error(`Completion server error (${completeRes.status}): ${text.substring(0, 100)}`);
+      }
+
+      if (!completeRes.ok || !completeData.success) {
+        throw new Error(completeData.error?.message || 'Failed to publish paper metadata.');
+      }
+
+      setPublishedPaper(completeData.paper);
       setStep('success');
     } catch (err: unknown) {
       setSubmitError(err instanceof Error ? err.message : 'An error occurred during submission.');
