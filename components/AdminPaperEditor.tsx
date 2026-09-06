@@ -262,6 +262,19 @@ export default function AdminPaperEditor({
           border-radius: var(--radius-sm);
           font-size: 0.875rem;
         }
+        @media (max-width: 639px) {
+          .grid-cols-2 {
+            grid-template-columns: 1fr;
+          }
+          .modal-actions {
+            flex-direction: column-reverse;
+            gap: 0.75rem;
+          }
+          .modal-actions > button,
+          .modal-actions > div {
+            width: 100%;
+          }
+        }
       `}</style>
     </div>
   );

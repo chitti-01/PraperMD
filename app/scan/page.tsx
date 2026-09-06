@@ -782,6 +782,24 @@ export default function ScanPage() {
             opacity: 0.3;
             cursor: not-allowed;
           }
+          @media (max-width: 639px) {
+            .pages-review-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 0.75rem;
+            }
+            .page-thumbnail-box {
+              height: 180px;
+            }
+            .btn-icon {
+              width: 38px;
+              height: 38px;
+            }
+          }
+          @media (max-width: 380px) {
+            .pages-review-grid {
+              grid-template-columns: 1fr;
+            }
+          }
         `}</style>
       </div>
     );

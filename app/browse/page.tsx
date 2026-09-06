@@ -124,18 +124,26 @@ function BrowseContent() {
 
       <style jsx>{`
         .browse-header {
-          margin-top: 1rem;
+          margin-top: 0.75rem;
+          margin-bottom: 1.25rem;
         }
 
         .archive-rows-list {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.875rem;
         }
 
         .mx-auto {
           margin-left: auto;
           margin-right: auto;
+        }
+
+        @media (max-width: 639px) {
+          .browse-header {
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+          }
         }
       `}</style>
     </div>

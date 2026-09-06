@@ -68,9 +68,16 @@ export default function Footer() {
         .editorial-footer {
           background-color: #111827;
           color: #9CA3AF;
-          padding-top: 3rem;
+          padding-top: 2.5rem;
           padding-bottom: 2.5rem;
           border-top: 1px solid #1F2937;
+        }
+
+        @media (max-width: 639px) {
+          .editorial-footer {
+            padding-top: 2rem;
+            padding-bottom: calc(var(--mobile-bottom-nav-height, 60px) + 2rem);
+          }
         }
 
         .footer-top-grid {

@@ -165,22 +165,23 @@ export default function PaperCard({ paper, index }: PaperCardProps) {
           min-width: 130px;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 639px) {
           .archive-paper-entry {
             flex-direction: column;
             align-items: flex-start;
-            padding: 1.125rem;
-            gap: 1rem;
+            padding: 1rem;
+            gap: 0.75rem;
+            border-radius: var(--radius-md);
           }
           .archive-number {
             display: none;
           }
           .archive-title {
-            font-size: 1.0625rem;
+            font-size: 1rem;
           }
           .archive-eyebrow-row {
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.35rem 0.5rem;
           }
           .archive-metadata-line {
             gap: 0.35rem;
@@ -189,12 +190,14 @@ export default function PaperCard({ paper, index }: PaperCardProps) {
           .archive-actions-column {
             flex-direction: row;
             width: 100%;
-            gap: 0.625rem;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
           }
           .archive-actions-column a {
             flex: 1;
             justify-content: center;
-            min-height: 44px;
+            min-height: 48px;
+            font-weight: 600;
           }
         }
       `}</style>

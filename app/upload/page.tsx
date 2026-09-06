@@ -530,6 +530,27 @@ export default function UploadPage() {
           font-size: 0.6875rem;
           padding: 0.15rem 0.4rem;
         }
+
+        @media (max-width: 639px) {
+          .upload-header {
+            margin-top: 0.5rem;
+            margin-bottom: 1.25rem;
+          }
+
+          .method-card {
+            padding: 1rem;
+            gap: 0.75rem;
+          }
+
+          .method-icon-bubble {
+            width: 40px;
+            height: 40px;
+          }
+
+          .form-step-section {
+            margin-bottom: 1.5rem;
+          }
+        }
       `}</style>
     </div>
   );

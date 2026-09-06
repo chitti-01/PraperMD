@@ -158,9 +158,9 @@ export default function Header() {
           border-color: var(--accent-highlight);
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 639px) {
           .editorial-header {
-            height: 60px;
+            height: var(--mobile-header-height, 56px);
           }
           .nav-menu {
             display: none;
@@ -172,20 +172,24 @@ export default function Header() {
             gap: 0.5rem;
           }
           .brand-symbol {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
           }
           .brand-name {
             font-size: 1rem;
+            line-height: 1;
           }
           .brand-sub {
-            font-size: 0.6875rem;
+            font-size: 0.65rem;
             white-space: nowrap;
+            letter-spacing: 0.02em;
           }
           .btn-header-scan {
             padding: 0.35rem 0.75rem;
             font-size: 0.8125rem;
-            min-height: 38px;
+            min-height: 40px;
+            border-radius: var(--radius-md);
           }
         }
 

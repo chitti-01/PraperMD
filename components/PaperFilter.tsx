@@ -220,6 +220,12 @@ export default function PaperFilter({
           .search-row {
             flex-direction: column;
             align-items: stretch;
+            gap: 0.5rem;
+          }
+
+          .search-input-field {
+            height: 48px;
+            border-radius: 10px;
           }
 
           .search-row button {
@@ -231,23 +237,32 @@ export default function PaperFilter({
           .filters-strip {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
+            gap: 0.625rem;
+            padding-top: 0.75rem;
           }
 
           .filter-select-unit {
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.25rem;
+            gap: 0.2rem;
             width: 100%;
           }
 
           .select-field {
             width: 100%;
-            min-height: 44px;
+            min-height: 48px;
+            border-radius: var(--radius-md);
+            font-size: 0.8125rem;
           }
 
           .ml-auto {
             margin-left: 0;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .filters-strip {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

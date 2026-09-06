@@ -13,42 +13,28 @@ export default function MobileBottomNav() {
   }
 
   const items = [
-    { label: 'Browse', href: '/browse', icon: Search, isPrimary: false },
-    { label: 'Scan', href: '/scan', icon: Camera, isPrimary: true },
-    { label: 'Upload', href: '/upload', icon: Upload, isPrimary: false },
-    { label: 'Coverage', href: '/coverage', icon: Grid, isPrimary: false },
+    { label: 'Browse', href: '/browse', icon: Search },
+    { label: 'Scan', href: '/scan', icon: Camera, isScan: true },
+    { label: 'Upload', href: '/upload', icon: Upload },
+    { label: 'Coverage', href: '/coverage', icon: Grid },
   ];
 
   return (
-    <nav className="mobile-bottom-nav">
+    <nav className="mobile-bottom-nav" aria-label="Mobile Navigation Bar">
       <div className="mobile-nav-grid">
         {items.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
-          if (item.isPrimary) {
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="nav-item-scan-primary"
-                aria-label="Scan Paper with Phone Camera"
-              >
-                <div className="scan-icon-bubble">
-                  <Icon className="w-5 h-5 text-white" />
-                </div>
-                <span className="scan-label">Scan</span>
-              </Link>
-            );
-          }
-
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-item ${isActive ? 'nav-item-active' : ''}`}
+              className={`nav-cell ${isActive ? 'nav-cell-active' : ''} ${item.isScan ? 'nav-cell-scan' : ''}`}
             >
-              <Icon className="w-5 h-5 nav-icon" />
+              <div className={`icon-container ${isActive ? 'icon-container-active' : ''} ${item.isScan ? 'icon-scan-bg' : ''}`}>
+                <Icon className="w-5 h-5 nav-icon" />
+              </div>
               <span className="nav-label">{item.label}</span>
             </Link>
           );
@@ -63,11 +49,11 @@ export default function MobileBottomNav() {
           left: 0;
           right: 0;
           z-index: 900;
-          background-color: rgba(255, 255, 255, 0.97);
+          background-color: rgba(255, 255, 255, 0.98);
           backdrop-filter: blur(12px);
           border-top: 1px solid var(--border-subtle);
-          padding-bottom: env(safe-area-inset-bottom, 4px);
-          box-shadow: 0 -4px 16px rgba(17, 24, 39, 0.05);
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+          box-shadow: 0 -2px 10px rgba(17, 24, 39, 0.04);
         }
 
         @media (max-width: 639px) {
@@ -79,11 +65,11 @@ export default function MobileBottomNav() {
         .mobile-nav-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          height: 62px;
+          height: var(--mobile-bottom-nav-height, 60px);
           align-items: center;
         }
 
-        .nav-item {
+        .nav-cell {
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -91,52 +77,56 @@ export default function MobileBottomNav() {
           height: 100%;
           color: var(--text-muted);
           text-decoration: none;
-          gap: 3px;
+          gap: 2px;
+          transition: color 0.15s ease;
+          user-select: none;
+        }
+
+        .icon-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 26px;
+          border-radius: var(--radius-pill);
+          transition: background-color 0.15s ease;
+        }
+
+        .nav-cell-active {
+          color: var(--primary-teal);
+        }
+
+        .nav-cell-active .icon-container-active {
+          background-color: var(--primary-teal-light);
+          color: var(--primary-teal);
+        }
+
+        .nav-cell-scan {
+          color: var(--accent-highlight);
+        }
+
+        .nav-cell-scan .icon-scan-bg {
+          background-color: var(--accent-highlight-bg);
+          color: var(--accent-highlight);
+        }
+
+        .nav-cell-scan.nav-cell-active .icon-scan-bg {
+          background-color: var(--accent-highlight);
+          color: #FFFFFF;
+        }
+
+        .nav-label {
           font-size: 0.6875rem;
           font-weight: 600;
-          transition: color 0.15s ease;
-        }
-
-        .nav-item-active {
-          color: var(--primary-teal);
-          font-weight: 700;
-        }
-
-        .nav-item-scan-primary {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          top: -6px;
-          text-decoration: none;
-        }
-
-        .scan-icon-bubble {
-          width: 48px;
-          height: 48px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, var(--accent-highlight) 0%, #2563EB 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-          transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        .nav-item-scan-primary:active .scan-icon-bubble {
-          transform: scale(0.94);
-        }
-
-        .scan-label {
-          font-size: 0.6875rem;
-          font-weight: 800;
-          color: var(--accent-highlight);
-          margin-top: 1px;
           letter-spacing: -0.01em;
-          white-space: nowrap;
+          line-height: 1;
+        }
+
+        .nav-cell-active .nav-label {
+          font-weight: 700;
         }
       `}</style>
     </nav>
   );
 }
+

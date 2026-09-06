@@ -518,7 +518,7 @@ export default function HomePage() {
         @media (max-width: 1023px) {
           .hero-ref1-grid {
             grid-template-columns: 1fr;
-            gap: 2rem;
+            gap: 1.5rem;
           }
 
           .hero-left-col {
@@ -531,25 +531,61 @@ export default function HomePage() {
         }
 
         @media (max-width: 639px) {
+          .ref1-hero-section {
+            padding-top: 0.75rem;
+            padding-bottom: 2rem;
+          }
+
           .ref1-headline {
-            font-size: clamp(2rem, 8vw, 2.75rem);
-            margin-bottom: 0.875rem;
+            font-size: clamp(1.75rem, 7.5vw, 2.5rem);
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
           }
 
           .ref1-subtext {
             font-size: 0.9375rem;
+            line-height: 1.45;
             margin-bottom: 1.25rem;
           }
 
           .ref1-cta-row {
             flex-direction: column;
             width: 100%;
+            gap: 0.75rem;
           }
 
           .ref1-btn-scan, .ref1-btn-upload, .ref1-btn-browse {
             width: 100%;
             justify-content: center;
-            min-height: 48px;
+            min-height: 50px;
+          }
+
+          .ref1-subjects-section {
+            margin-top: 2rem;
+            margin-bottom: 2.5rem;
+          }
+
+          .ref1-subjects-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.875rem;
+          }
+
+          .ref1-subject-card {
+            padding: 0.875rem 1rem;
+            gap: 0.75rem;
+          }
+
+          .subject-icon-badge {
+            width: 40px;
+            height: 40px;
+          }
+
+          .subject-card-title {
+            font-size: 0.9375rem;
+          }
+
+          .subject-card-desc {
+            font-size: 0.75rem;
           }
 
           .flex-between {
@@ -561,9 +597,11 @@ export default function HomePage() {
           .hero-br {
             display: none;
           }
+        }
 
-          .ref1-subject-card {
-            padding: 1rem 1.125rem;
+        @media (max-width: 400px) {
+          .ref1-subjects-grid {
+            grid-template-columns: 1fr;
           }
         }
 

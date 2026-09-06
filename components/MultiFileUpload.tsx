@@ -260,6 +260,26 @@ export default function MultiFileUpload({
         .remove-btn:hover {
           background-color: var(--accent-rose-light);
         }
+
+        @media (max-width: 639px) {
+          .dropzone-surface {
+            padding: 1.75rem 1rem;
+          }
+
+          .dropzone-title {
+            font-size: 1rem;
+          }
+
+          .dropzone-sub {
+            font-size: 0.8125rem;
+          }
+
+          .dropzone-surface button {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 0.75rem;
+          }
+        }
       `}</style>
     </div>
   );

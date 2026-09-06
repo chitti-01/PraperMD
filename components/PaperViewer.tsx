@@ -195,8 +195,8 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         @media (max-width: 639px) {
           .viewer-toolbar {
             flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
+            align-items: stretch;
+            gap: 0.75rem;
           }
 
           .toolbar-filename {
@@ -204,16 +204,21 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 180px;
+            max-width: 220px;
+          }
+
+          .toolbar-controls {
+            width: 100%;
+            justify-content: space-between;
           }
 
           .viewer-stage {
-            min-height: 320px;
-            padding: 1rem;
+            min-height: 300px;
+            padding: 0.75rem;
           }
 
           .pdf-placeholder, .image-mock {
-            padding: 1.5rem 1rem;
+            padding: 1.25rem 0.875rem;
           }
         }
       `}</style>
