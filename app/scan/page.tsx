@@ -101,10 +101,35 @@ export default function ScanPage() {
     };
   }, []);
 
+  const [videoStalled, setVideoStalled] = useState(false);
+
+  // Automatically attach media stream when step becomes 'camera' and video DOM ref mounts
+  useEffect(() => {
+    if (step === 'camera') {
+      if (streamRef.current && videoRef.current) {
+        const video = videoRef.current;
+        video.srcObject = streamRef.current;
+        video.play().catch((err) => console.error('Camera video play error:', err));
+      }
+
+      // 3-second black screen detector
+      const timer = setTimeout(() => {
+        if (videoRef.current) {
+          if (videoRef.current.videoWidth === 0 || videoRef.current.readyState < 2) {
+            setVideoStalled(true);
+          }
+        }
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
   // Start camera explicitly after user interaction
   const startCamera = async (mode: 'environment' | 'user' = facingMode) => {
     stopCameraStream();
     setCameraError(null);
+    setVideoStalled(false);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setCameraError('Your browser does not support camera scanning. Please use a modern mobile browser or upload existing files.');
@@ -124,23 +149,19 @@ export default function ScanPage() {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
       // Check torch capabilities
       const track = stream.getVideoTracks()[0];
       if (track && 'getCapabilities' in track) {
         const caps = (track as unknown as { getCapabilities: () => { torch?: boolean } }).getCapabilities();
-        if (caps && caps.torch) {
-          setTorchSupported(true);
-        } else {
-          setTorchSupported(false);
-        }
+        setTorchSupported(Boolean(caps && caps.torch));
       }
 
       setStep('camera');
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
     } catch (err: unknown) {
       console.error('Camera permission or stream error:', err);
       const errName = err && typeof err === 'object' && 'name' in err ? String(err.name) : '';
@@ -307,7 +328,17 @@ export default function ScanPage() {
         body: formData,
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const textText = await res.text();
+        if (res.status === 413) {
+          throw new Error('Scanned images total size exceeds server limit (413 Request Entity Too Large). Please reduce number of pages or retake.');
+        }
+        throw new Error(`Upload server error (${res.status}). ${textText.substring(0, 100) || 'Please try again.'}`);
+      }
 
       if (res.status === 409) {
         setDuplicateAlert({
@@ -430,16 +461,44 @@ export default function ScanPage() {
 
         {/* Camera Live Video Feed */}
         <div className="camera-video-frame">
-          <video ref={videoRef} playsInline autoPlay muted className="camera-video" />
+          <video
+            ref={videoRef}
+            playsInline
+            autoPlay
+            muted
+            className="camera-video"
+          />
+
+          {videoStalled && (
+            <div className="camera-stalled-overlay card text-center p-6 mx-4">
+              <AlertTriangle className="w-8 h-8 text-amber mx-auto mb-2" />
+              <h4 className="font-bold text-lg text-white mb-1">Camera Stream Stalled</h4>
+              <p className="text-xs text-slate-300 mb-4 max-w-xs mx-auto">
+                Camera access was granted but video frames are not rendering. Tap below to retry or upload a file.
+              </p>
+              <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
+                <button onClick={() => startCamera()} className="btn btn-primary btn-sm w-full touch-target">
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Retry Camera Stream</span>
+                </button>
+                <Link href="/upload" className="btn btn-secondary btn-sm w-full touch-target text-slate-900">
+                  <Upload className="w-4 h-4" />
+                  <span>Upload Document File</span>
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Framing Guide Overlay */}
-          <div className="document-frame-guide">
-            <div className="frame-corner top-left"></div>
-            <div className="frame-corner top-right"></div>
-            <div className="frame-corner bottom-left"></div>
-            <div className="frame-corner bottom-right"></div>
-            <p className="frame-guide-text">Position paper inside frame</p>
-          </div>
+          {!videoStalled && (
+            <div className="document-frame-guide">
+              <div className="frame-corner top-left"></div>
+              <div className="frame-corner top-right"></div>
+              <div className="frame-corner bottom-left"></div>
+              <div className="frame-corner bottom-right"></div>
+              <p className="frame-guide-text">Position paper inside frame</p>
+            </div>
+          )}
         </div>
 
         {/* Bottom Shutter Controls */}
@@ -531,6 +590,13 @@ export default function ScanPage() {
             width: 100%;
             height: 100%;
             object-fit: cover;
+          }
+
+          .camera-stalled-overlay {
+            position: absolute;
+            z-index: 20;
+            background-color: rgba(15, 23, 42, 0.95);
+            border: 1px solid #334155;
           }
 
           .document-frame-guide {

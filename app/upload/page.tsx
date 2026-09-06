@@ -89,7 +89,17 @@ export default function UploadPage() {
         body: formData,
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const textText = await res.text();
+        if (res.status === 413) {
+          throw new Error('File size exceeds server payload limits (413 Request Entity Too Large). Please compress your PDF or reduce page count.');
+        }
+        throw new Error(`Upload server error (${res.status}). ${textText.substring(0, 100) || 'Please try again.'}`);
+      }
 
       if (res.status === 409) {
         setDuplicateAlert({

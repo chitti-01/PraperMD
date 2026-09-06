@@ -46,15 +46,15 @@ export default function AdminPage() {
     try {
       const [papersRes, reportsRes, metaRes] = await Promise.all([
         fetch('/api/papers?limit=100'),
-        fetch('/api/admin/reports/all', {
+        fetch('/api/admin/reports', {
           headers: { 'x-admin-key': key },
         }),
         fetch('/api/metadata'),
       ]);
 
-      const papersData = await papersRes.json();
-      const reportsData = await reportsRes.json();
-      const metaData = await metaRes.json();
+      const papersData = papersRes.ok ? await papersRes.json() : { papers: [] };
+      const reportsData = reportsRes.ok ? await reportsRes.json() : { reports: [] };
+      const metaData = metaRes.ok ? await metaRes.json() : { subjects: [], examTypes: [] };
 
       setPapers(papersData.papers || []);
       setReports(reportsData.reports || []);

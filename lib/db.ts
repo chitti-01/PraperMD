@@ -124,9 +124,9 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
       .from('question_papers')
       .select(
         `*,
-        colleges!inner(name),
-        subjects!inner(name),
-        exam_types!inner(name)`,
+        colleges(name),
+        subjects(name),
+        exam_types(name)`,
         { count: 'exact' }
       )
       .eq('status', 'active');
