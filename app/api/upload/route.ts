@@ -2,8 +2,37 @@ import { NextRequest, NextResponse } from 'next/server';
 import { calculateBufferHash } from '@/lib/hash';
 import { checkDuplicateHash, createQuestionPaper, getColleges } from '@/lib/db';
 import { UploadPaperSchema } from '@/lib/validation';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { supabaseAdmin } from '@/lib/supabase/admin';
+
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024; // 20 MB max total request size
+const MAX_FILE_COUNT = 20; // 20 pages max
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+];
+
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  return Boolean(url && !url.includes('xyz-medico.supabase.co'));
+}
 
 export async function POST(request: NextRequest) {
+  // 1. Rate Limiting Check (Max 10 upload requests per 10 minutes per IP)
+  const rateLimit = checkRateLimit(request, {
+    maxRequests: 10,
+    windowMs: 10 * 60 * 1000,
+  });
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: `Upload rate limit exceeded. Please wait ${rateLimit.reset} seconds before trying again.` },
+      { status: 429 }
+    );
+  }
+
   try {
     const formData = await request.formData();
 
@@ -17,7 +46,7 @@ export async function POST(request: NextRequest) {
     const academic_year = (formData.get('academic_year') as string) || '';
     const description = (formData.get('description') as string) || '';
 
-    // Validate metadata
+    // Validate metadata via Zod schema
     const validated = UploadPaperSchema.parse({
       title,
       subject_id,
@@ -39,19 +68,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Read first file buffer for SHA-256 hash calculation
+    if (files.length > MAX_FILE_COUNT) {
+      return NextResponse.json(
+        { error: `Exceeded maximum page limit. You may upload up to ${MAX_FILE_COUNT} pages per paper.` },
+        { status: 400 }
+      );
+    }
+
+    // 2. Validate total file size and MIME types
+    const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
+
+    if (totalBytes > MAX_TOTAL_BYTES) {
+      return NextResponse.json(
+        { error: 'Total file size exceeds the 20MB limit. Please compress images or reduce page count.' },
+        { status: 400 }
+      );
+    }
+
+    for (const file of files) {
+      if (file.type && !ALLOWED_MIME_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: `Unsupported file type "${file.type}". Allowed formats: PDF, JPEG, PNG, WebP.` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 3. Read first file buffer for SHA-256 hash calculation & Storage upload
     const firstFile = files[0];
     const arrayBuffer = await firstFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 1. SHA-256 Duplicate Check
+    // SHA-256 Duplicate Check
     const fileHash = calculateBufferHash(buffer);
     const existingDuplicate = await checkDuplicateHash(fileHash);
 
     if (existingDuplicate) {
       return NextResponse.json(
         {
-          error: `Exact duplicate file detected! This question paper already exists as "${existingDuplicate.title}" (${existingDuplicate.exam_year}).`,
+          error: `Exact duplicate file detected! This question paper already exists in the repository as "${existingDuplicate.title}" (${existingDuplicate.exam_year}).`,
           isDuplicate: true,
           existingPaperId: existingDuplicate.id,
         },
@@ -59,33 +114,100 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Identify file type & page count
-    const isPdf = firstFile.type === 'application/pdf' || firstFile.name.endsWith('.pdf');
+    // Sanitize filename to prevent path traversal
+    const safeFilename = firstFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const isPdf = firstFile.type === 'application/pdf' || safeFilename.endsWith('.pdf');
     const fileType = isPdf ? 'pdf' : files.length > 1 ? 'multi_image' : 'image';
     const pageCount = isPdf ? 1 : files.length;
-    const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
 
     const colleges = await getColleges();
-    const defaultCollege = colleges[0];
+    const defaultCollege = (colleges && colleges.length > 0)
+      ? colleges[0]
+      : { id: 'col-gmc-01', name: 'Government Medical College (GMC)' };
 
-    // 3. Create active question paper record
-    const paper = await createQuestionPaper({
-      college_id: defaultCollege.id,
-      subject_id: validated.subject_id,
-      exam_type_id: validated.exam_type_id,
-      mbbs_year: validated.mbbs_year as any,
-      semester: validated.semester,
-      exam_year: validated.exam_year,
-      academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
-      title: validated.title,
-      description: validated.description,
-      storage_path: `supabase/question-papers/${Date.now()}_${firstFile.name}`,
-      file_type: fileType,
-      file_size: totalBytes,
-      file_hash: fileHash,
-      original_file_name: firstFile.name,
-      page_count: pageCount,
-    });
+    // Generate safe deterministic storage path
+    const storagePath = `${defaultCollege.id}/${Date.now()}_${safeFilename}`;
+
+    // 4. Upload file object to private Supabase Storage bucket 'question-papers' if configured
+    let storageUploaded = false;
+    if (isSupabaseConfigured()) {
+      let { error: storageError } = await supabaseAdmin.storage
+        .from('question-papers')
+        .upload(storagePath, buffer, {
+          contentType: firstFile.type || 'application/pdf',
+          upsert: false,
+        });
+
+      if (storageError) {
+        console.error('Supabase Storage Upload Error:', storageError);
+
+        // Auto-create bucket if missing
+        const isBucketMissing =
+          storageError.message?.toLowerCase().includes('not found') ||
+          (storageError as { statusCode?: string }).statusCode === '404' ||
+          (storageError as { error?: string }).error === 'Bucket not found';
+
+        if (isBucketMissing) {
+          try {
+            const { error: bucketCreateErr } = await supabaseAdmin.storage.createBucket('question-papers', {
+              public: false,
+            });
+
+            if (!bucketCreateErr) {
+              const { error: retryError } = await supabaseAdmin.storage
+                .from('question-papers')
+                .upload(storagePath, buffer, {
+                  contentType: firstFile.type || 'application/pdf',
+                  upsert: false,
+                });
+              if (!retryError) {
+                storageError = null;
+                storageUploaded = true;
+              }
+            }
+          } catch (bucketErr) {
+            console.error('Failed to auto-create question-papers bucket:', bucketErr);
+          }
+        }
+
+        if (storageError && process.env.NODE_ENV === 'production') {
+          return NextResponse.json(
+            { error: `Storage Error: Failed to upload question paper file (${storageError.message}). Please verify that the 'question-papers' storage bucket exists in Supabase Storage.` },
+            { status: 500 }
+          );
+        }
+      } else {
+        storageUploaded = true;
+      }
+    }
+
+    // 5. Create database record atomically with Storage cleanup fallback
+    let paper;
+    try {
+      paper = await createQuestionPaper({
+        college_id: defaultCollege.id,
+        subject_id: validated.subject_id,
+        exam_type_id: validated.exam_type_id,
+        mbbs_year: validated.mbbs_year as '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS',
+        semester: validated.semester,
+        exam_year: validated.exam_year,
+        academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
+        title: validated.title,
+        description: validated.description,
+        storage_path: storagePath,
+        file_type: fileType,
+        file_size: totalBytes,
+        file_hash: fileHash,
+        original_file_name: safeFilename,
+        page_count: pageCount,
+      });
+    } catch (dbError: unknown) {
+      // ATOMIC CLEANUP: If DB insert fails after storage upload succeeds, delete orphaned file from Storage
+      if (storageUploaded) {
+        await supabaseAdmin.storage.from('question-papers').remove([storagePath]);
+      }
+      throw dbError;
+    }
 
     return NextResponse.json(
       {
@@ -95,15 +217,16 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    if (error.name === 'ZodError') {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: error.errors[0]?.message || 'Invalid form data' },
+        { error: 'Invalid upload form data' },
         { status: 400 }
       );
     }
+    const msg = error instanceof Error ? error.message : 'An unexpected error occurred while processing your paper upload.';
     return NextResponse.json(
-      { error: error.message || 'Failed to process upload' },
+      { error: msg },
       { status: 500 }
     );
   }

@@ -46,8 +46,8 @@ export default function ReportModal({
         setSuccess(false);
         onClose();
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Error submitting report');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error submitting report');
     } finally {
       setSubmitting(false);
     }

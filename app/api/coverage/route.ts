@@ -11,6 +11,7 @@ export async function GET() {
       matrix,
     });
   } catch (error) {
+    console.error('API /coverage error:', error);
     return NextResponse.json({ error: 'Failed to generate coverage matrix' }, { status: 500 });
   }
 }

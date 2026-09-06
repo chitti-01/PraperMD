@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { QuestionPaper, Subject } from '@/lib/types';
 import PaperCard from '@/components/PaperCard';
 import {
   Search,
-  Upload,
-  BookOpen,
   ArrowRight,
   Activity,
   HeartPulse,
@@ -18,9 +17,11 @@ import {
   Stethoscope,
   Crosshair,
   FileText,
+  Camera,
 } from 'lucide-react';
 
 export default function HomePage() {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [recentPapers, setRecentPapers] = useState<QuestionPaper[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -52,7 +53,7 @@ export default function HomePage() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
-      window.location.href = `/browse?query=${encodeURIComponent(query.trim())}`;
+      router.push(`/browse?query=${encodeURIComponent(query.trim())}`);
     }
   };
 
@@ -114,23 +115,28 @@ export default function HomePage() {
               </div>
             </form>
 
-            {/* Dual CTAs below search */}
+            {/* Mobile-First Priority CTAs */}
             <div className="ref1-cta-row">
-              <Link href="/upload" className="btn btn-primary btn-lg ref1-btn-upload">
-                <Upload className="w-4 h-4" />
-                <span>Upload Paper</span>
+              <Link href="/scan" className="btn btn-primary btn-lg ref1-btn-scan">
+                <Camera className="w-5 h-5" />
+                <span>Scan Paper</span>
               </Link>
 
               <Link href="/browse" className="btn btn-secondary btn-lg ref1-btn-browse">
                 <FileText className="w-4 h-4 text-accent-blue" />
-                <span>Browse Papers</span>
+                <span>Browse Archive</span>
               </Link>
+            </div>
+
+            <div className="mt-3 text-sm text-muted">
+              Have a PDF or scanned images? <Link href="/upload" className="font-semibold underline hover:text-teal">Upload File</Link>
             </div>
           </div>
 
           {/* Right Column (56%): Large Prominent Hero Artwork (1.5-2x scale) */}
           <div className="hero-right-col">
             <div className="hero-artwork-frame">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/hero-illustration.png"
                 alt="PaperMD Question Paper Stack and Hourglass Illustration"
@@ -292,7 +298,7 @@ export default function HomePage() {
           flex-wrap: wrap;
         }
 
-        .ref1-btn-upload {
+        .ref1-btn-scan {
           background-color: var(--accent-highlight);
           border-color: var(--accent-highlight);
           border-radius: 10px;

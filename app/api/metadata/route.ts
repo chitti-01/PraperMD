@@ -15,6 +15,7 @@ export async function GET() {
       examTypes,
     });
   } catch (error) {
+    console.error('API /metadata error:', error);
     return NextResponse.json({ error: 'Failed to fetch metadata' }, { status: 500 });
   }
 }

@@ -108,7 +108,7 @@ function BrowseContent() {
           <SearchX className="w-12 h-12 text-muted mx-auto mb-4" />
           <h3 className="h2-title mb-2">No Matching Question Papers</h3>
           <p className="subtext mb-6">
-            We couldn't find any papers matching your specific filter criteria.
+            We couldn&apos;t find any papers matching your specific filter criteria.
           </p>
           <button onClick={handleResetFilters} className="btn btn-primary">
             Clear All Filters

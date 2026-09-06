@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateQuestionPaper, deleteQuestionPaper } from '@/lib/db';
-
-function verifyAdmin(request: NextRequest): boolean {
-  const adminKey = request.headers.get('x-admin-key');
-  const secret = process.env.ADMIN_SECRET_KEY || 'medico_admin_secret_2026';
-  return adminKey?.trim() === secret.trim();
-}
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!verifyAdmin(request)) {
+  if (!verifyAdminSession(request)) {
     return NextResponse.json({ error: 'Unauthorized admin access' }, { status: 401 });
   }
 
@@ -26,6 +21,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, paper: updated });
   } catch (error) {
+    console.error('PATCH /api/admin/papers/[id] error:', error);
     return NextResponse.json({ error: 'Failed to update paper' }, { status: 500 });
   }
 }
@@ -34,7 +30,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!verifyAdmin(request)) {
+  if (!verifyAdminSession(request)) {
     return NextResponse.json({ error: 'Unauthorized admin access' }, { status: 401 });
   }
 
@@ -48,6 +44,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Paper removed from repository' });
   } catch (error) {
+    console.error('DELETE /api/admin/papers/[id] error:', error);
     return NextResponse.json({ error: 'Failed to delete paper' }, { status: 500 });
   }
 }

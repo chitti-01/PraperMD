@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { QuestionPaper, PaperReport, Subject, ExamType } from '@/lib/types';
 import AdminPaperEditor from '@/components/AdminPaperEditor';
-import { Shield, Lock, FileText, AlertTriangle, Download, Database, Edit3 } from 'lucide-react';
+import { Shield, Lock, FileText, AlertTriangle, Edit3 } from 'lucide-react';
 
 export default function AdminPage() {
   const [passkey, setPasskey] = useState('');
@@ -36,8 +36,8 @@ export default function AdminPage() {
 
       setIsAuthenticated(true);
       fetchAdminData(passkey);
-    } catch (err: any) {
-      setAuthError(err.message || 'Auth failed');
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Auth failed');
     }
   };
 
@@ -192,6 +192,7 @@ export default function AdminPage() {
       </section>
 
       {/* Tabs */}
+      {loading && <div className="subtext text-xs mb-4">Refreshing data...</div>}
       <div className="tabs-header mb-6">
         <button
           onClick={() => setActiveTab('papers')}

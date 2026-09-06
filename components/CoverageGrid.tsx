@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { CoverageMatrixItem } from '@/lib/types';
-import { CheckCircle2, Minus } from 'lucide-react';
+import { CheckCircle2, Minus, Camera } from 'lucide-react';
 
 interface CoverageGridProps {
   years: number[];
@@ -21,7 +21,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                 <th key={yr}>{yr}</th>
               ))}
               <th>Coverage</th>
-              <th>Action</th>
+              <th>Contribute</th>
             </tr>
           </thead>
           <tbody>
@@ -38,15 +38,19 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                       {hasPaper ? (
                         <Link
                           href={`/browse?subjectId=${row.subjectId}&examYear=${yr}`}
-                          className="check-link"
+                          className="check-link touch-target"
                           title={`View ${row.subjectName} ${yr} papers`}
                         >
                           <CheckCircle2 className="w-5 h-5 text-emerald inline" />
                         </Link>
                       ) : (
-                        <span className="dash-missing" title="Paper missing for this year">
+                        <Link
+                          href={`/scan?subjectId=${row.subjectId}&examYear=${yr}`}
+                          className="dash-missing touch-target"
+                          title={`Scan paper for ${row.subjectName} (${yr})`}
+                        >
                           <Minus className="w-4 h-4 text-light inline" />
-                        </span>
+                        </Link>
                       )}
                     </td>
                   );
@@ -57,12 +61,16 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                 </td>
 
                 <td>
-                  <Link
-                    href={`/upload?subjectId=${row.subjectId}`}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    Upload
-                  </Link>
+                  <div className="flex justify-center gap-1">
+                    <Link
+                      href={`/scan?subjectId=${row.subjectId}`}
+                      className="btn btn-primary btn-sm"
+                      title="Scan Paper with Phone Camera"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Scan</span>
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}

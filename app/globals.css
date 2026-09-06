@@ -332,3 +332,53 @@ select.input-field {
   overflow-y: auto;
   border: 1px solid var(--border-subtle);
 }
+
+/* Mobile-First Touch Targets & Responsive Layout Utilities */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure mobile form fields have min 44px height for comfortable touch */
+.input-field, .btn {
+  min-height: 44px;
+}
+
+.btn-sm {
+  min-height: 38px;
+}
+
+/* Bottom spacing so mobile sticky bottom nav doesn't cover page footer */
+@media (max-width: 639px) {
+  .main-content {
+    padding-bottom: 5rem;
+  }
+  
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  /* Single column form layout on mobile */
+  .grid-form-2, .grid-form-3 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

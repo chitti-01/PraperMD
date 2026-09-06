@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CoverageGrid from '@/components/CoverageGrid';
+import { CoverageMatrixItem } from '@/lib/types';
 import { Upload, CheckCircle2 } from 'lucide-react';
 
 export default function CoveragePage() {
   const [years, setYears] = useState<number[]>([2023, 2024, 2025, 2026]);
-  const [matrix, setMatrix] = useState<any[]>([]);
+  const [matrix, setMatrix] = useState<CoverageMatrixItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

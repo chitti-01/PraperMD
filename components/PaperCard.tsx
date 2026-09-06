@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { QuestionPaper } from '@/lib/types';
-import { FileText, Eye, Download, Calendar, ArrowRight } from 'lucide-react';
+import { Eye, Download } from 'lucide-react';
 
 interface PaperCardProps {
   paper: QuestionPaper;

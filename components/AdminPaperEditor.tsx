@@ -63,8 +63,8 @@ export default function AdminPaperEditor({
 
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Save error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Save error');
     } finally {
       setSaving(false);
     }
@@ -90,8 +90,8 @@ export default function AdminPaperEditor({
 
       onSaved();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Delete error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Delete error');
     } finally {
       setSaving(false);
     }
@@ -158,7 +158,7 @@ export default function AdminPaperEditor({
               <label className="form-label">MBBS Year</label>
               <select
                 value={mbbsYear}
-                onChange={(e) => setMbbsYear(e.target.value as any)}
+                onChange={(e) => setMbbsYear(e.target.value as QuestionPaper['mbbs_year'])}
                 className="input-field"
               >
                 <option value="1st MBBS">1st MBBS</option>

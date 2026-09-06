@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Subject, ExamType } from '@/lib/types';
+import { Subject, ExamType, QuestionPaper } from '@/lib/types';
 import MultiFileUpload from '@/components/MultiFileUpload';
-import { CheckCircle2, AlertTriangle, ArrowRight, Upload, FileText } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ArrowRight, Upload, FileText, Camera } from 'lucide-react';
 
 export default function UploadPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [examTypes, setExamTypes] = useState<ExamType[]>([]);
+
+  const [method, setMethod] = useState<'scan' | 'file'>('file');
 
   const [title, setTitle] = useState('');
   const [subjectId, setSubjectId] = useState('');
@@ -16,14 +18,14 @@ export default function UploadPage() {
   const [mbbsYear, setMbbsYear] = useState('1st MBBS');
   const [semester, setSemester] = useState('');
   const [examYear, setExamYear] = useState('2026');
-  const [academicYear, setAcademicYear] = useState('2025-2026');
+  const [academicYear] = useState('2025-2026');
   const [description, setDescription] = useState('');
 
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [duplicateAlert, setDuplicateAlert] = useState<{ message: string; existingPaperId?: string } | null>(null);
-  const [publishedPaper, setPublishedPaper] = useState<any | null>(null);
+  const [publishedPaper, setPublishedPaper] = useState<QuestionPaper | null>(null);
 
   useEffect(() => {
     async function loadMetadata() {
@@ -102,8 +104,8 @@ export default function UploadPage() {
       }
 
       setPublishedPaper(data.paper);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred during submission.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred during submission.');
     } finally {
       setSubmitting(false);
     }
@@ -116,7 +118,7 @@ export default function UploadPage() {
           <CheckCircle2 className="w-16 h-16 text-emerald mx-auto mb-4" />
           <h1 className="h1-hero text-2xl mb-2">Question Paper Published!</h1>
           <p className="subtext mb-6">
-            Your paper <strong>"{publishedPaper.title}"</strong> is now live in the GMC archive.
+            Your paper <strong>&quot;{publishedPaper.title}&quot;</strong> is now live in the GMC archive.
           </p>
 
           <div className="published-summary-box mb-6 text-left">
@@ -149,12 +151,46 @@ export default function UploadPage() {
 
   return (
     <div className="container max-w-3xl">
-      <div className="upload-header mb-8">
-        <div className="eyebrow">UPLOAD</div>
-        <h1 className="h1-hero">Question Paper</h1>
+      <div className="upload-header mb-6">
+        <div className="eyebrow">CONTRIBUTE PAPER</div>
+        <h1 className="h1-hero">Add a Question Paper</h1>
         <p className="subtext">
-          Contribute previous-year, semester, internal assessment, or practical exam papers to the PaperMD repository.
+          How would you like to contribute your question paper to the PaperMD archive?
         </p>
+      </div>
+
+      {/* Dual Contribution Method Selection */}
+      <div className="contribution-method-grid mb-8">
+        <Link href="/scan" className="method-card primary-method-card">
+          <div className="method-icon-bubble primary-bubble">
+            <Camera className="w-6 h-6 text-white" />
+          </div>
+          <div className="method-content">
+            <div className="flex-between-title">
+              <h3 className="method-title text-primary-blue">Scan Paper</h3>
+              <span className="badge badge-accent">RECOMMENDED FOR MOBILE</span>
+            </div>
+            <p className="method-desc">
+              Use your phone camera to scan physical paper pages step-by-step.
+            </p>
+          </div>
+          <ArrowRight className="w-5 h-5 text-accent-blue method-arrow" />
+        </Link>
+
+        <div
+          onClick={() => setMethod('file')}
+          className={`method-card ${method === 'file' ? 'method-card-active' : ''}`}
+        >
+          <div className="method-icon-bubble secondary-bubble">
+            <Upload className="w-5 h-5 text-teal" />
+          </div>
+          <div className="method-content">
+            <h3 className="method-title">Upload Existing File</h3>
+            <p className="method-desc">
+              Select existing PDF documents or photo files already saved on your device.
+            </p>
+          </div>
+        </div>
       </div>
 
       {duplicateAlert && (
@@ -393,6 +429,106 @@ export default function UploadPage() {
 
         .w-full {
           width: 100%;
+        }
+
+        /* Contribution Method Cards */
+        .contribution-method-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+          .contribution-method-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        .method-card {
+          background-color: #FFFFFF;
+          border: 2px solid var(--border-subtle);
+          border-radius: var(--radius-lg);
+          padding: 1.25rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          text-decoration: none;
+        }
+
+        .method-card:hover {
+          border-color: var(--border-medium);
+          transform: translateY(-1px);
+        }
+
+        .primary-method-card {
+          border-color: var(--accent-highlight);
+          background-color: #F8FAFC;
+        }
+
+        .primary-method-card:hover {
+          border-color: #2563EB;
+          box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+        }
+
+        .method-card-active {
+          border-color: var(--primary-teal);
+          background-color: var(--primary-teal-light);
+        }
+
+        .method-icon-bubble {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .primary-bubble {
+          background-color: var(--accent-highlight);
+        }
+
+        .secondary-bubble {
+          background-color: #F1F5F9;
+        }
+
+        .method-content {
+          flex: 1;
+        }
+
+        .flex-between-title {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          flex-wrap: wrap;
+        }
+
+        .method-title {
+          font-size: 1rem;
+          font-weight: 800;
+          color: var(--text-primary);
+        }
+
+        .text-primary-blue {
+          color: #1D4ED8;
+        }
+
+        .method-desc {
+          font-size: 0.8125rem;
+          color: var(--text-muted);
+          line-height: 1.35;
+          margin-top: 0.15rem;
+        }
+
+        :global(.badge-accent) {
+          background-color: #DBEAFE;
+          color: #1E40AF;
+          font-size: 0.6875rem;
+          padding: 0.15rem 0.4rem;
         }
       `}</style>
     </div>

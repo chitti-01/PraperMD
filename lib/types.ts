@@ -90,7 +90,7 @@ export interface PaperFilterParams {
   mbbsYear?: string;
   examYear?: number;
   collegeId?: string;
-  sortBy?: 'latest' | 'views' | 'downloads';
+  sortBy?: 'latest' | 'views' | 'downloads' | 'oldest';
   limit?: number;
   offset?: number;
 }

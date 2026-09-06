@@ -15,6 +15,7 @@ export async function GET(
 
     return NextResponse.json(paper);
   } catch (error) {
+    console.error('API /papers/[id] error:', error);
     return NextResponse.json({ error: 'Failed to fetch paper details' }, { status: 500 });
   }
 }

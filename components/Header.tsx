@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Upload, Grid, Shield, Search } from 'lucide-react';
+import { BookOpen, Upload, Grid, Shield, Search, Camera } from 'lucide-react';
 
 export default function Header() {
   const pathname = usePathname();
 
   const navItems = [
     { label: 'Browse', href: '/browse', icon: Search },
+    { label: 'Scan', href: '/scan', icon: Camera },
     { label: 'Upload', href: '/upload', icon: Upload },
     { label: 'Coverage', href: '/coverage', icon: Grid },
     { label: 'Admin', href: '/admin', icon: Shield },
@@ -43,9 +44,13 @@ export default function Header() {
         </nav>
 
         <div className="header-cta">
-          <Link href="/upload" className="btn btn-primary btn-sm">
+          <Link href="/scan" className="btn btn-primary btn-sm btn-header-scan">
+            <Camera className="w-3.5 h-3.5" />
+            <span>Scan Paper</span>
+          </Link>
+          <Link href="/upload" className="btn btn-secondary btn-sm header-upload-btn">
             <Upload className="w-3.5 h-3.5" />
-            <span>Upload Paper</span>
+            <span>Upload</span>
           </Link>
         </div>
       </div>
@@ -145,10 +150,19 @@ export default function Header() {
         .header-cta {
           display: flex;
           align-items: center;
+          gap: 0.5rem;
+        }
+
+        .btn-header-scan {
+          background-color: var(--accent-highlight);
+          border-color: var(--accent-highlight);
         }
 
         @media (max-width: 640px) {
           .nav-menu {
+            display: none;
+          }
+          .header-upload-btn {
             display: none;
           }
         }

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { QuestionPaper } from '@/lib/types';
 import PaperViewer from '@/components/PaperViewer';
 import ReportModal from '@/components/ReportModal';
-import { Download, AlertTriangle, ArrowLeft, Calendar, GraduationCap, Building2, Eye, FileText } from 'lucide-react';
+import { Download, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
