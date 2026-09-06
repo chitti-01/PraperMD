@@ -37,7 +37,7 @@ export default function MobileBottomNav() {
                 <div className="scan-icon-bubble">
                   <Icon className="w-5 h-5 text-white" />
                 </div>
-                <span className="scan-label">Scan Paper</span>
+                <span className="scan-label">Scan</span>
               </Link>
             );
           }
@@ -63,11 +63,11 @@ export default function MobileBottomNav() {
           left: 0;
           right: 0;
           z-index: 900;
-          background-color: rgba(255, 255, 255, 0.96);
+          background-color: rgba(255, 255, 255, 0.97);
           backdrop-filter: blur(12px);
           border-top: 1px solid var(--border-subtle);
-          padding-bottom: env(safe-area-inset-bottom, 0px);
-          box-shadow: 0 -4px 16px rgba(17, 24, 39, 0.06);
+          padding-bottom: env(safe-area-inset-bottom, 4px);
+          box-shadow: 0 -4px 16px rgba(17, 24, 39, 0.05);
         }
 
         @media (max-width: 639px) {
@@ -79,7 +79,7 @@ export default function MobileBottomNav() {
         .mobile-nav-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          height: 60px;
+          height: 62px;
           align-items: center;
         }
 
@@ -91,11 +91,10 @@ export default function MobileBottomNav() {
           height: 100%;
           color: var(--text-muted);
           text-decoration: none;
-          gap: 2px;
-          font-size: 0.725rem;
+          gap: 3px;
+          font-size: 0.6875rem;
           font-weight: 600;
           transition: color 0.15s ease;
-          min-height: 48px;
         }
 
         .nav-item-active {
@@ -109,20 +108,19 @@ export default function MobileBottomNav() {
           align-items: center;
           justify-content: center;
           position: relative;
-          top: -8px;
+          top: -6px;
           text-decoration: none;
-          min-height: 48px;
         }
 
         .scan-icon-bubble {
-          width: 46px;
-          height: 46px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           background: linear-gradient(135deg, var(--accent-highlight) 0%, #2563EB 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
           transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 

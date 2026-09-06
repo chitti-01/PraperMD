@@ -160,7 +160,7 @@ export default function Header() {
 
         @media (max-width: 640px) {
           .editorial-header {
-            height: 64px;
+            height: 60px;
           }
           .nav-menu {
             display: none;

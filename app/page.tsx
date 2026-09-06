@@ -18,6 +18,7 @@ import {
   Crosshair,
   FileText,
   Camera,
+  Upload,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -115,21 +116,25 @@ export default function HomePage() {
               </div>
             </form>
 
-            {/* Mobile-First Priority CTAs */}
-            <div className="ref1-cta-row">
+            {/* Structured Priority CTAs */}
+            <div className="ref1-cta-row mb-3">
               <Link href="/scan" className="btn btn-primary btn-lg ref1-btn-scan">
                 <Camera className="w-5 h-5" />
                 <span>Scan Paper</span>
               </Link>
 
-              <Link href="/browse" className="btn btn-secondary btn-lg ref1-btn-browse">
-                <FileText className="w-4 h-4 text-accent-blue" />
-                <span>Browse Archive</span>
+              <Link href="/upload" className="btn btn-secondary btn-lg ref1-btn-upload">
+                <Upload className="w-5 h-5 text-teal" />
+                <span>Upload Paper</span>
               </Link>
             </div>
 
-            <div className="mt-3 text-sm text-muted">
-              Have a PDF or scanned images? <Link href="/upload" className="font-semibold underline hover:text-teal">Upload File</Link>
+            <div className="text-sm text-muted flex items-center gap-2 flex-wrap">
+              <span>Looking to explore previous exams?</span>
+              <Link href="/browse" className="font-semibold text-accent-blue hover:underline inline-flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5 text-accent-blue" />
+                <span>Browse Archive →</span>
+              </Link>
             </div>
           </div>
 
@@ -301,6 +306,11 @@ export default function HomePage() {
         .ref1-btn-scan {
           background-color: var(--accent-highlight);
           border-color: var(--accent-highlight);
+          border-radius: 10px;
+          padding: 0.75rem 1.5rem;
+        }
+
+        .ref1-btn-upload {
           border-radius: 10px;
           padding: 0.75rem 1.5rem;
         }
@@ -536,7 +546,7 @@ export default function HomePage() {
             width: 100%;
           }
 
-          .ref1-btn-scan, .ref1-btn-browse {
+          .ref1-btn-scan, .ref1-btn-upload, .ref1-btn-browse {
             width: 100%;
             justify-content: center;
             min-height: 48px;
