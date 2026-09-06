@@ -169,17 +169,32 @@ export default function PaperCard({ paper, index }: PaperCardProps) {
           .archive-paper-entry {
             flex-direction: column;
             align-items: flex-start;
+            padding: 1.125rem;
+            gap: 1rem;
           }
           .archive-number {
             display: none;
           }
+          .archive-title {
+            font-size: 1.0625rem;
+          }
+          .archive-eyebrow-row {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+          .archive-metadata-line {
+            gap: 0.35rem;
+            font-size: 0.78125rem;
+          }
           .archive-actions-column {
             flex-direction: row;
             width: 100%;
+            gap: 0.625rem;
           }
-          .archive-actions-column button,
           .archive-actions-column a {
             flex: 1;
+            justify-content: center;
+            min-height: 44px;
           }
         }
       `}</style>

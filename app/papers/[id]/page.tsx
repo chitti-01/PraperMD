@@ -193,6 +193,30 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           flex-wrap: wrap;
         }
 
+        @media (max-width: 639px) {
+          .paper-entry-header {
+            padding: 1.25rem;
+          }
+          .entry-title {
+            font-size: clamp(1.35rem, 5vw, 1.75rem);
+          }
+          .eyebrow-line {
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+          }
+          .entry-actions-row {
+            flex-direction: column;
+            width: 100%;
+          }
+          .entry-actions-row a,
+          .entry-actions-row button {
+            width: 100%;
+            justify-content: center;
+            min-height: 48px;
+          }
+        }
+
         :global(.text-amber-btn) {
           border-color: #FDE68A !important;
         }

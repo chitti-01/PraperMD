@@ -159,11 +159,33 @@ export default function Header() {
         }
 
         @media (max-width: 640px) {
+          .editorial-header {
+            height: 64px;
+          }
           .nav-menu {
             display: none;
           }
           .header-upload-btn {
             display: none;
+          }
+          .brand-group {
+            gap: 0.5rem;
+          }
+          .brand-symbol {
+            width: 34px;
+            height: 34px;
+          }
+          .brand-name {
+            font-size: 1rem;
+          }
+          .brand-sub {
+            font-size: 0.6875rem;
+            white-space: nowrap;
+          }
+          .btn-header-scan {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8125rem;
+            min-height: 38px;
           }
         }
 

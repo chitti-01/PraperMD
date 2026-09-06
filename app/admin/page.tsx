@@ -474,6 +474,25 @@ export default function AdminPage() {
         .max-w-xs {
           max-width: 280px;
         }
+
+        @media (max-width: 639px) {
+          .editorial-stats-strip {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 1rem;
+          }
+          .stat-divider {
+            display: none;
+          }
+          .tabs-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .tab-btn {
+            justify-content: center;
+          }
+        }
       `}</style>
     </div>
   );

@@ -89,8 +89,8 @@ export default function HomePage() {
           {/* Left Column (44%): Compact Editorial Typography & Controls */}
           <div className="hero-left-col">
             <h1 className="h1-hero ref1-headline">
-              Every question <br />
-              has a history. <br />
+              Every question <br className="hero-br" />
+              has a history. <br className="hero-br" />
               <span className="text-highlight">Start there.</span>
             </h1>
 
@@ -504,29 +504,83 @@ export default function HomePage() {
           color: var(--accent-highlight);
         }
 
-        /* Responsive Breakpoints for Hero */
+        /* Responsive Breakpoints for Hero & Sections */
         @media (max-width: 1023px) {
           .hero-ref1-grid {
             grid-template-columns: 1fr;
-            gap: 2.5rem;
+            gap: 2rem;
           }
 
           .hero-left-col {
             max-width: 100%;
           }
 
-          .ref1-headline {
-            font-size: 2.75rem;
-          }
-
           .hero-artwork-frame {
-            width: 100%;
-            max-width: 100%;
-            margin-left: 0;
+            display: none;
+          }
+        }
+
+        @media (max-width: 639px) {
+          .ref1-headline {
+            font-size: clamp(2rem, 8vw, 2.75rem);
+            margin-bottom: 0.875rem;
           }
 
-          .hero-artwork-img {
-            max-height: 480px;
+          .ref1-subtext {
+            font-size: 0.9375rem;
+            margin-bottom: 1.25rem;
+          }
+
+          .ref1-cta-row {
+            flex-direction: column;
+            width: 100%;
+          }
+
+          .ref1-btn-scan, .ref1-btn-browse {
+            width: 100%;
+            justify-content: center;
+            min-height: 48px;
+          }
+
+          .flex-between {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+          }
+
+          .hero-br {
+            display: none;
+          }
+
+          .ref1-subject-card {
+            padding: 1rem 1.125rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .search-box-ref1 {
+            flex-direction: column;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            gap: 0.5rem;
+          }
+
+          .search-input-ref1 {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-medium);
+            border-radius: 10px;
+            padding-right: 1rem;
+            height: 48px;
+            box-shadow: 0 2px 8px rgba(17, 24, 39, 0.03);
+          }
+
+          .search-submit-ref1 {
+            position: static;
+            width: 100%;
+            height: 48px;
+            border-radius: 10px;
           }
         }
       `}</style>

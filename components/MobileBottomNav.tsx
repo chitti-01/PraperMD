@@ -79,7 +79,7 @@ export default function MobileBottomNav() {
         .mobile-nav-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          height: 64px;
+          height: 60px;
           align-items: center;
         }
 
@@ -91,10 +91,11 @@ export default function MobileBottomNav() {
           height: 100%;
           color: var(--text-muted);
           text-decoration: none;
-          gap: 3px;
+          gap: 2px;
           font-size: 0.725rem;
           font-weight: 600;
           transition: color 0.15s ease;
+          min-height: 48px;
         }
 
         .nav-item-active {
@@ -108,19 +109,20 @@ export default function MobileBottomNav() {
           align-items: center;
           justify-content: center;
           position: relative;
-          top: -10px;
+          top: -8px;
           text-decoration: none;
+          min-height: 48px;
         }
 
         .scan-icon-bubble {
-          width: 50px;
-          height: 50px;
+          width: 46px;
+          height: 46px;
           border-radius: 50%;
           background: linear-gradient(135deg, var(--accent-highlight) 0%, #2563EB 100%);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
           transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
@@ -129,11 +131,12 @@ export default function MobileBottomNav() {
         }
 
         .scan-label {
-          font-size: 0.7rem;
+          font-size: 0.6875rem;
           font-weight: 800;
           color: var(--accent-highlight);
-          margin-top: 2px;
+          margin-top: 1px;
           letter-spacing: -0.01em;
+          white-space: nowrap;
         }
       `}</style>
     </nav>

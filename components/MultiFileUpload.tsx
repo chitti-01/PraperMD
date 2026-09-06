@@ -232,12 +232,16 @@ export default function MultiFileUpload({
           display: flex;
           flex-direction: column;
           flex: 1;
+          min-width: 0;
         }
 
         .file-name {
           font-size: 0.875rem;
           font-weight: 600;
           color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .file-size {

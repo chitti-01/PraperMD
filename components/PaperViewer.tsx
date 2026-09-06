@@ -191,6 +191,31 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           color: #cbd5e1;
           font-weight: 600;
         }
+
+        @media (max-width: 639px) {
+          .viewer-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+          }
+
+          .toolbar-filename {
+            font-size: 0.8125rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+          }
+
+          .viewer-stage {
+            min-height: 320px;
+            padding: 1rem;
+          }
+
+          .pdf-placeholder, .image-mock {
+            padding: 1.5rem 1rem;
+          }
+        }
       `}</style>
     </div>
   );

@@ -216,7 +216,36 @@ export default function PaperFilter({
           margin-left: auto;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 639px) {
+          .search-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .search-row button {
+            width: 100%;
+            min-height: 44px;
+            justify-content: center;
+          }
+
+          .filters-strip {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+          }
+
+          .filter-select-unit {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+            width: 100%;
+          }
+
+          .select-field {
+            width: 100%;
+            min-height: 44px;
+          }
+
           .ml-auto {
             margin-left: 0;
           }

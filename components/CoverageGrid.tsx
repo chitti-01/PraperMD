@@ -147,6 +147,18 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         :global(.text-light) {
           color: var(--text-light);
         }
+
+        @media (max-width: 639px) {
+          .coverage-matrix-table th,
+          .coverage-matrix-table td {
+            padding: 0.75rem 0.625rem;
+            font-size: 0.8125rem;
+          }
+          .subject-cell {
+            font-size: 0.8125rem;
+            white-space: nowrap;
+          }
+        }
       `}</style>
     </div>
   );

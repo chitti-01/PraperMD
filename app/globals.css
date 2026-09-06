@@ -75,7 +75,7 @@ button, input, select, textarea {
   font-size: inherit;
 }
 
-/* Container & Layout - Generous Desktop Width */
+/* Container & Layout - Preserved Desktop Width & Mobile 16px Padding */
 .container {
   width: 100%;
   max-width: 1320px;
@@ -83,6 +83,13 @@ button, input, select, textarea {
   margin-right: auto;
   padding-left: 1.75rem;
   padding-right: 1.75rem;
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 .page-wrapper {
@@ -97,7 +104,13 @@ button, input, select, textarea {
   padding-bottom: 5rem;
 }
 
-/* Editorial Typography System */
+@media (max-width: 639px) {
+  .main-content {
+    padding-bottom: 5.5rem;
+  }
+}
+
+/* Editorial Typography System - Fluid Sizing */
 .eyebrow {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -112,9 +125,9 @@ button, input, select, textarea {
 }
 
 .h1-hero {
-  font-size: 3rem;
+  font-size: clamp(2rem, 5.5vw, 3.75rem);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.12;
   color: var(--text-primary);
   letter-spacing: -0.03em;
 }
@@ -126,7 +139,7 @@ button, input, select, textarea {
 }
 
 .h2-title {
-  font-size: 1.75rem;
+  font-size: clamp(1.35rem, 3.5vw, 1.75rem);
   font-weight: 800;
   line-height: 1.25;
   color: var(--text-primary);
@@ -134,7 +147,7 @@ button, input, select, textarea {
 }
 
 .subtext {
-  font-size: 1.0625rem;
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
   color: var(--text-secondary);
   line-height: 1.55;
 }

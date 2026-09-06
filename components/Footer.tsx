@@ -68,7 +68,7 @@ export default function Footer() {
         .editorial-footer {
           background-color: #111827;
           color: #9CA3AF;
-          padding-top: 4rem;
+          padding-top: 3rem;
           padding-bottom: 2.5rem;
           border-top: 1px solid #1F2937;
         }
@@ -76,12 +76,25 @@ export default function Footer() {
         .footer-top-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 2.5rem;
+          gap: 1.75rem;
+        }
+
+        @media (min-width: 480px) and (max-width: 767px) {
+          .footer-top-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .brand-col {
+            grid-column: span 2;
+          }
         }
 
         @media (min-width: 768px) {
+          .editorial-footer {
+            padding-top: 4rem;
+          }
           .footer-top-grid {
             grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2.5rem;
           }
         }
 
