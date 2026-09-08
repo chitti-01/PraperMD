@@ -21,6 +21,7 @@ function BrowseContent() {
     subjectId: searchParams.get('subjectId') || '',
     examTypeId: searchParams.get('examTypeId') || '',
     mbbsYear: searchParams.get('mbbsYear') || '',
+    examAttempt: searchParams.get('examAttempt') || '',
     examYear: searchParams.get('examYear') || '',
     sortBy: searchParams.get('sortBy') || 'latest',
   });
@@ -48,6 +49,7 @@ function BrowseContent() {
         if (filters.subjectId) params.set('subjectId', filters.subjectId);
         if (filters.examTypeId) params.set('examTypeId', filters.examTypeId);
         if (filters.mbbsYear) params.set('mbbsYear', filters.mbbsYear);
+        if (filters.examAttempt) params.set('examAttempt', filters.examAttempt);
         if (filters.examYear) params.set('examYear', filters.examYear);
         if (filters.sortBy) params.set('sortBy', filters.sortBy);
 
@@ -76,6 +78,7 @@ function BrowseContent() {
       subjectId: '',
       examTypeId: '',
       mbbsYear: '',
+      examAttempt: '',
       examYear: '',
       sortBy: 'latest',
     });

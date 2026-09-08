@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS question_papers (
   description TEXT,
   additional_details TEXT,
   mbbs_year TEXT NOT NULL, -- '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS'
-  semester TEXT,
+  exam_attempt TEXT NOT NULL DEFAULT 'Main Examination', -- 'Main Examination' | 'Supplementary Examination'
   exam_year INT NOT NULL,
   academic_year TEXT,
   storage_path TEXT NOT NULL,
@@ -104,7 +104,7 @@ CREATE INDEX IF NOT EXISTS idx_qp_subject ON question_papers(subject_id);
 CREATE INDEX IF NOT EXISTS idx_qp_exam_type ON question_papers(exam_type_id);
 CREATE INDEX IF NOT EXISTS idx_qp_exam_year ON question_papers(exam_year);
 CREATE INDEX IF NOT EXISTS idx_qp_mbbs_year ON question_papers(mbbs_year);
-CREATE INDEX IF NOT EXISTS idx_qp_semester ON question_papers(semester);
+CREATE INDEX IF NOT EXISTS idx_qp_exam_attempt ON question_papers(exam_attempt);
 CREATE INDEX IF NOT EXISTS idx_qp_status ON question_papers(status);
 CREATE INDEX IF NOT EXISTS idx_qp_file_hash ON question_papers(file_hash);
 CREATE INDEX IF NOT EXISTS idx_qp_created_at ON question_papers(created_at DESC);
@@ -188,7 +188,7 @@ VALUES
   ('b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a05', 'Model Examination', 'model-examination', 'Pre-university preparatory trial examination paper.', true)
 ON CONFLICT (name) DO NOTHING;
 
--- Initial Core Medical Subjects for GMC
+-- Initial 19 Canonical Medical Subjects for GMC
 INSERT INTO subjects (id, college_id, name, slug, code, description, is_active)
 VALUES
   ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a01', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Anatomy', 'anatomy', 'ANAT', 'Human gross anatomy, histology, embryology, and neuroanatomy.', true),
@@ -197,6 +197,17 @@ VALUES
   ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a04', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Pathology', 'pathology', 'PATH', 'General pathology, systemic pathology, hematology, and clinical pathology.', true),
   ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a05', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Pharmacology', 'pharmacology', 'PHAR', 'Autonomic, cardiovascular, antimicrobial therapeutics and clinical pharmacology.', true),
   ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a06', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Microbiology', 'microbiology', 'MICR', 'Bacteriology, virology, mycology, parasitology, and immunology.', true),
-  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a07', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'General Medicine', 'general-medicine', 'MED', 'Internal medicine, cardiology, pulmonology, endocrinology, and critical care.', true),
-  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a08', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'General Surgery', 'general-surgery', 'SURG', 'General surgical principles, trauma, gastrointestinal surgery, and urology.', true)
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a07', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Forensic Medicine and Toxicology', 'fmt', 'FMT', 'Forensic pathology, legal medicine, clinical toxicology, and medical jurisprudence.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a08', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Community Medicine', 'community-medicine', 'COMM', 'Epidemiology, public health, preventive medicine, and biostatistics.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a09', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Ophthalmology', 'ophthalmology', 'OPHT', 'Ocular anatomy, refraction, cataract, glaucoma, and neuro-ophthalmology.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a10', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Otorhinolaryngology (ENT)', 'ent', 'ENT', 'Diseases of ear, nose, throat, head and neck surgery.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'General Medicine', 'general-medicine', 'MED', 'Internal medicine, cardiology, pulmonology, endocrinology, and critical care.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'General Surgery', 'general-surgery', 'SURG', 'General surgical principles, trauma, gastrointestinal surgery, and urology.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Obstetrics and Gynaecology', 'obgyn', 'OBGY', 'Antenatal care, labor management, high-risk pregnancy, and gynaecologic oncology.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Paediatrics', 'paediatrics', 'PAED', 'Childhood growth, development, neonatology, and paediatric infections.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Orthopaedics', 'orthopaedics', 'ORTH', 'Fractures, joint dislocations, bone tumors, and orthopaedic surgery.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Dermatology, Venereology & Leprosy', 'dermatology', 'DVL', 'Skin disorders, sexually transmitted infections, and Hansen disease.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a17', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Psychiatry', 'psychiatry', 'PSYC', 'Mood disorders, psychosis, anxiety, addiction, and behavioral health.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a18', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Anaesthesiology', 'anaesthesiology', 'ANES', 'General and regional anaesthesia, airway management, and pain medicine.', true),
+  ('c1eebc99-9c0b-4ef8-bb6d-6bb9bd380a19', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Radiodiagnosis', 'radiodiagnosis', 'RADIO', 'X-rays, ultrasound, CT, MRI, and interventional radiology.', true)
 ON CONFLICT (college_id, name) DO NOTHING;

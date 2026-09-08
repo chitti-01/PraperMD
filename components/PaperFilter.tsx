@@ -11,6 +11,7 @@ interface PaperFilterProps {
     subjectId: string;
     examTypeId: string;
     mbbsYear: string;
+    examAttempt: string;
     examYear: string;
     sortBy: string;
   };
@@ -26,6 +27,7 @@ export default function PaperFilter({
   onReset,
 }: PaperFilterProps) {
   const mbbsYears = ['1st MBBS', '2nd MBBS', '3rd MBBS', 'Final MBBS'];
+  const examAttempts = ['Main Examination', 'Supplementary Examination'];
   const examYears = ['2026', '2025', '2024', '2023', '2022'];
 
   const hasActiveFilters =
@@ -33,6 +35,7 @@ export default function PaperFilter({
     filters.subjectId ||
     filters.examTypeId ||
     filters.mbbsYear ||
+    filters.examAttempt ||
     filters.examYear ||
     filters.sortBy !== 'latest';
 
@@ -43,7 +46,7 @@ export default function PaperFilter({
           <Search className="search-icon w-5 h-5" />
           <input
             type="text"
-            placeholder="Search Anatomy, Physiology, Semester 2025..."
+            placeholder="Search Anatomy, Physiology, 2025..."
             value={filters.query}
             onChange={(e) => onChange('query', e.target.value)}
             className="search-input-field"
@@ -102,6 +105,22 @@ export default function PaperFilter({
             {mbbsYears.map((yr) => (
               <option key={yr} value={yr}>
                 {yr}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-select-unit">
+          <span className="select-label">Attempt</span>
+          <select
+            value={filters.examAttempt}
+            onChange={(e) => onChange('examAttempt', e.target.value)}
+            className="select-field"
+          >
+            <option value="">All Attempts</option>
+            {examAttempts.map((att) => (
+              <option key={att} value={att}>
+                {att}
               </option>
             ))}
           </select>

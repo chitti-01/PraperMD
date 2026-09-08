@@ -58,7 +58,7 @@ export default function ScanPage() {
   const [subjectId, setSubjectId] = useState('');
   const [examTypeId, setExamTypeId] = useState('');
   const [mbbsYear, setMbbsYear] = useState('1st MBBS');
-  const [semester, setSemester] = useState('');
+  const [examAttempt, setExamAttempt] = useState<'Main Examination' | 'Supplementary Examination'>('Main Examination');
   const [examYear, setExamYear] = useState('2026');
   const [academicYear] = useState('2025-2026');
   const [description, setDescription] = useState('');
@@ -322,7 +322,7 @@ export default function ScanPage() {
           subject_id: subjectId,
           exam_type_id: examTypeId,
           mbbs_year: mbbsYear,
-          semester,
+          exam_attempt: examAttempt,
           exam_year: Number(examYear),
           academic_year: academicYear,
           description,
@@ -1026,14 +1026,15 @@ export default function ScanPage() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Semester (Optional)</label>
-              <input
-                type="text"
-                placeholder="e.g. Semester 1"
-                value={semester}
-                onChange={(e) => setSemester(e.target.value)}
+              <label className="form-label">Exam Attempt *</label>
+              <select
+                value={examAttempt}
+                onChange={(e) => setExamAttempt(e.target.value as 'Main Examination' | 'Supplementary Examination')}
                 className="input-field"
-              />
+              >
+                <option value="Main Examination">Main Examination</option>
+                <option value="Supplementary Examination">Supplementary Examination</option>
+              </select>
             </div>
           </div>
 

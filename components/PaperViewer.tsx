@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { QuestionPaper } from '@/lib/types';
-import { FileText, Image as ImageIcon, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from 'lucide-react';
+import { FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from 'lucide-react';
 
 interface PaperViewerProps {
   paper: QuestionPaper;
@@ -53,32 +53,25 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
 
       <div className="viewer-stage">
         {isPdf ? (
-          <div className="pdf-preview-box">
-            <div className="pdf-placeholder">
-              <FileText className="w-16 h-16 text-teal mb-4" />
-              <h3>PDF Document Preview</h3>
-              <p className="text-secondary mb-4">
-                {paper.title} ({paper.page_count} pages)
-              </p>
-              <div className="pdf-actions">
-                <a
-                  href={`/api/papers/${paper.id}/download`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary"
-                >
-                  Open PDF Viewer / Download
-                </a>
-              </div>
-            </div>
+          <div className="pdf-embed-box" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}>
+            <iframe
+              src={`/api/papers/${paper.id}/download#toolbar=0`}
+              title={`Document Preview - ${paper.title}`}
+              className="pdf-iframe"
+            />
           </div>
         ) : (
-          <div className="image-preview-box" style={{ transform: `scale(${zoomLevel / 100})` }}>
-            <div className="image-mock">
-              <ImageIcon className="w-16 h-16 text-teal mb-2" />
-              <p className="font-semibold">Question Paper Page {currentSlide} of {paper.page_count}</p>
-              <p className="text-sm text-muted">Scanned Document Image Preview</p>
-            </div>
+          <div className="image-preview-box" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/papers/${paper.id}/download`}
+              alt={`${paper.title} Page ${currentSlide}`}
+              className="scanned-doc-img"
+              onError={(e) => {
+                // Fallback to placeholder if file stream is missing or mock
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
           </div>
         )}
       </div>
@@ -162,19 +155,33 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           overflow: auto;
         }
 
-        .pdf-placeholder,
-        .image-mock {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          padding: 3rem;
-          background-color: #1e293b;
-          border-radius: var(--radius-md);
-          max-width: 600px;
+        .pdf-embed-box {
           width: 100%;
-          border: 1px dashed #334155;
+          max-width: 900px;
+          height: 650px;
+          border-radius: var(--radius-md);
+          overflow: hidden;
+          background-color: #ffffff;
+        }
+
+        .pdf-iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+
+        .image-preview-box {
+          max-width: 900px;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+        }
+
+        .scanned-doc-img {
+          max-width: 100%;
+          height: auto;
+          border-radius: var(--radius-md);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
 
         .carousel-nav {

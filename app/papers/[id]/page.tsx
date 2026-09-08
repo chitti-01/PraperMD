@@ -78,7 +78,7 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
 
         <div className="entry-meta-strip mb-4">
           <span className="meta-badge">{paper.mbbs_year}</span>
-          {paper.semester && <span className="meta-badge">{paper.semester}</span>}
+          {paper.exam_attempt && <span className="meta-badge">{paper.exam_attempt}</span>}
           <span className="meta-text">{paper.college_name || 'Government Medical College'}</span>
           <span className="meta-text">·</span>
           <span className="meta-text">{paper.view_count} views</span>

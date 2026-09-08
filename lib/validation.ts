@@ -7,7 +7,9 @@ export const UploadPaperSchema = z.object({
   mbbs_year: z.enum(['1st MBBS', '2nd MBBS', '3rd MBBS', 'Final MBBS'], {
     message: 'Please select an MBBS year',
   }),
-  semester: z.string().optional(),
+  exam_attempt: z.enum(['Main Examination', 'Supplementary Examination'], {
+    message: 'Please select an exam attempt',
+  }),
   exam_year: z.coerce.number().min(2000, 'Invalid year').max(2030, 'Invalid year'),
   academic_year: z.string().optional(),
   description: z.string().max(1000, 'Description is too long').optional(),

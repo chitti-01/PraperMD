@@ -29,6 +29,8 @@ export interface ExamType {
 
 export type MBBSYear = '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS';
 
+export type ExamAttempt = 'Main Examination' | 'Supplementary Examination';
+
 export type PaperStatus = 'active' | 'removed';
 
 export interface QuestionPaper {
@@ -37,7 +39,7 @@ export interface QuestionPaper {
   subject_id: string;
   exam_type_id: string;
   mbbs_year: MBBSYear;
-  semester?: string;
+  exam_attempt: ExamAttempt;
   exam_year: number;
   academic_year?: string;
   title: string;
@@ -88,6 +90,7 @@ export interface PaperFilterParams {
   subjectId?: string;
   examTypeId?: string;
   mbbsYear?: string;
+  examAttempt?: string;
   examYear?: number;
   collegeId?: string;
   sortBy?: 'latest' | 'views' | 'downloads' | 'oldest';

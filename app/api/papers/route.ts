@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const subjectId = searchParams.get('subjectId') || undefined;
     const examTypeId = searchParams.get('examTypeId') || undefined;
     const mbbsYear = searchParams.get('mbbsYear') || undefined;
+    const examAttempt = searchParams.get('examAttempt') || undefined;
     const examYear = searchParams.get('examYear') ? Number(searchParams.get('examYear')) : undefined;
     const sortBy = (searchParams.get('sortBy') as 'latest' | 'oldest' | 'downloads' | 'views') || 'latest';
     const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined;
@@ -18,6 +19,7 @@ export async function GET(request: NextRequest) {
       subjectId,
       examTypeId,
       mbbsYear,
+      examAttempt,
       examYear,
       sortBy,
       limit,

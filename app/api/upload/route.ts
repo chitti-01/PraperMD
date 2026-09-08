@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const subject_id = formData.get('subject_id') as string;
     const exam_type_id = formData.get('exam_type_id') as string;
     const mbbs_year = formData.get('mbbs_year') as string;
-    const semester = (formData.get('semester') as string) || '';
+    const exam_attempt = (formData.get('exam_attempt') as string) || 'Main Examination';
     const exam_year = formData.get('exam_year');
     const academic_year = (formData.get('academic_year') as string) || '';
     const description = (formData.get('description') as string) || '';
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       subject_id,
       exam_type_id,
       mbbs_year,
-      semester,
+      exam_attempt,
       exam_year,
       academic_year,
       description,
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     const colleges = await getColleges();
     const defaultCollege = (colleges && colleges.length > 0)
       ? colleges[0]
-      : { id: 'col-gmc-01', name: 'Government Medical College (GMC)' };
+      : { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', name: 'Government Medical College (GMC)' };
 
     // Generate safe deterministic storage path
     const storagePath = `${defaultCollege.id}/${Date.now()}_${safeFilename}`;
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
         subject_id: validated.subject_id,
         exam_type_id: validated.exam_type_id,
         mbbs_year: validated.mbbs_year as '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS',
-        semester: validated.semester,
+        exam_attempt: validated.exam_attempt,
         exam_year: validated.exam_year,
         academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
         title: validated.title,

@@ -27,6 +27,7 @@ export default function AdminPaperEditor({
   const [subjectId, setSubjectId] = useState(paper.subject_id);
   const [examTypeId, setExamTypeId] = useState(paper.exam_type_id);
   const [mbbsYear, setMbbsYear] = useState(paper.mbbs_year);
+  const [examAttempt, setExamAttempt] = useState(paper.exam_attempt || 'Main Examination');
   const [examYear, setExamYear] = useState(paper.exam_year.toString());
   const [description, setDescription] = useState(paper.description || '');
 
@@ -52,6 +53,7 @@ export default function AdminPaperEditor({
           subject_id: subjectId,
           exam_type_id: examTypeId,
           mbbs_year: mbbsYear,
+          exam_attempt: examAttempt,
           exam_year: Number(examYear),
           description,
         }),
@@ -153,7 +155,7 @@ export default function AdminPaperEditor({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-3 gap-3 mb-3">
             <div className="form-group">
               <label className="form-label">MBBS Year</label>
               <select
@@ -165,6 +167,18 @@ export default function AdminPaperEditor({
                 <option value="2nd MBBS">2nd MBBS</option>
                 <option value="3rd MBBS">3rd MBBS</option>
                 <option value="Final MBBS">Final MBBS</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Exam Attempt</label>
+              <select
+                value={examAttempt}
+                onChange={(e) => setExamAttempt(e.target.value as QuestionPaper['exam_attempt'])}
+                className="input-field"
+              >
+                <option value="Main Examination">Main Examination</option>
+                <option value="Supplementary Examination">Supplementary Examination</option>
               </select>
             </div>
 

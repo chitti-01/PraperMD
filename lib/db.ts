@@ -14,10 +14,9 @@ import {
   INITIAL_QUESTION_PAPERS,
   INITIAL_REPORTS,
 } from './mock-data';
-import { supabase } from './supabase/client';
 import { supabaseAdmin } from './supabase/admin';
 
-// In-Memory state store for development fallback when Supabase is unconfigured
+// In-Memory state store for development fallback ONLY when Supabase is completely unconfigured
 const memoryColleges: College[] = [INITIAL_COLLEGE];
 const memorySubjects: Subject[] = [...INITIAL_SUBJECTS];
 const memoryExamTypes: ExamType[] = [...INITIAL_EXAM_TYPES];
@@ -66,7 +65,7 @@ function enforceProductionDbGuard() {
 export async function getColleges(): Promise<College[]> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('colleges')
       .select('*')
       .eq('is_active', true)
@@ -82,7 +81,7 @@ export async function getColleges(): Promise<College[]> {
 export async function getSubjects(): Promise<Subject[]> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('subjects')
       .select('*')
       .eq('is_active', true)
@@ -98,7 +97,7 @@ export async function getSubjects(): Promise<Subject[]> {
 export async function getExamTypes(): Promise<ExamType[]> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('exam_types')
       .select('*')
       .eq('is_active', true)
@@ -134,6 +133,7 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
     if (params.subjectId) query = query.eq('subject_id', params.subjectId);
     if (params.examTypeId) query = query.eq('exam_type_id', params.examTypeId);
     if (params.mbbsYear) query = query.eq('mbbs_year', params.mbbsYear);
+    if (params.examAttempt) query = query.eq('exam_attempt', params.examAttempt);
     if (params.examYear) query = query.eq('exam_year', Number(params.examYear));
     if (params.collegeId) query = query.eq('college_id', params.collegeId);
 
@@ -146,6 +146,8 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
       query = query.order('view_count', { ascending: false });
     } else if (params.sortBy === 'downloads') {
       query = query.order('download_count', { ascending: false });
+    } else if (params.sortBy === 'oldest') {
+      query = query.order('created_at', { ascending: true });
     } else {
       query = query.order('created_at', { ascending: false });
     }
@@ -158,7 +160,12 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
 
     const { data, count, error } = await query;
 
-    if (!error && data) {
+    if (error) {
+      console.error('[PaperMD DB Error] getQuestionPapers failed:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+
+    if (data) {
       const formattedPapers: QuestionPaper[] = (data as DbPaperRow[]).map((p) => ({
         ...p,
         college_name: p.colleges?.name,
@@ -171,7 +178,7 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
     }
   }
 
-  // Local Memory Fallback
+  // Local Memory Fallback for unconfigured dev environments
   let result = memoryPapers.filter((p) => p.status === 'active');
 
   if (params.query && params.query.trim()) {
@@ -183,13 +190,15 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
         (p.subject_name && p.subject_name.toLowerCase().includes(q)) ||
         (p.exam_type_name && p.exam_type_name.toLowerCase().includes(q)) ||
         p.exam_year.toString().includes(q) ||
-        p.mbbs_year.toLowerCase().includes(q)
+        p.mbbs_year.toLowerCase().includes(q) ||
+        p.exam_attempt.toLowerCase().includes(q)
     );
   }
 
   if (params.subjectId) result = result.filter((p) => p.subject_id === params.subjectId);
   if (params.examTypeId) result = result.filter((p) => p.exam_type_id === params.examTypeId);
   if (params.mbbsYear) result = result.filter((p) => p.mbbs_year === params.mbbsYear);
+  if (params.examAttempt) result = result.filter((p) => p.exam_attempt === params.examAttempt);
   if (params.examYear) result = result.filter((p) => p.exam_year === Number(params.examYear));
   if (params.collegeId) result = result.filter((p) => p.college_id === params.collegeId);
 
@@ -197,6 +206,8 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
     result.sort((a, b) => b.view_count - a.view_count);
   } else if (params.sortBy === 'downloads') {
     result.sort((a, b) => b.download_count - a.download_count);
+  } else if (params.sortBy === 'oldest') {
+    result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   } else {
     result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
@@ -225,7 +236,13 @@ export async function getQuestionPaperById(id: string): Promise<QuestionPaper | 
       .eq('id', id)
       .single();
 
-    if (!error && data) {
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      console.error('[PaperMD DB Error] getQuestionPaperById failed:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
+
+    if (data) {
       // Increment view count asynchronously
       await supabaseAdmin
         .from('question_papers')
@@ -255,12 +272,17 @@ export async function getQuestionPaperById(id: string): Promise<QuestionPaper | 
 export async function checkDuplicateHash(fileHash: string): Promise<QuestionPaper | null> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('question_papers')
       .select('*')
       .eq('file_hash', fileHash)
       .eq('status', 'active')
       .maybeSingle();
+
+    if (error) {
+      console.error('[PaperMD DB Error] checkDuplicateHash failed:', error);
+      throw new Error(`Database Error: ${error.message}`);
+    }
 
     if (data) {
       return {
@@ -294,7 +316,7 @@ export async function createQuestionPaper(
       title: paperData.title,
       description: paperData.description || null,
       mbbs_year: paperData.mbbs_year,
-      semester: paperData.semester || null,
+      exam_attempt: paperData.exam_attempt || 'Main Examination',
       exam_year: paperData.exam_year,
       academic_year: paperData.academic_year || null,
       storage_path: paperData.storage_path,
@@ -318,22 +340,21 @@ export async function createQuestionPaper(
       .single();
 
     if (error || !data) {
-      console.warn(
-        `[PaperMD DB Notice] Supabase insert warning (${error?.message || 'No data returned'}). Operating with in-memory paper store fallback.`
-      );
-      // Fall through to memory store below
-    } else {
-      return {
-        ...data,
-        college_name: data.colleges?.name,
-        subject_name: data.subjects?.name,
-        exam_type_name: data.exam_types?.name,
-        original_file_name: data.file_name || data.original_file_name || data.title || 'document.pdf',
-        published_at: data.created_at,
-      } as QuestionPaper;
+      console.error('[PaperMD DB Failure] Supabase insert failed:', error);
+      throw new Error(`Database Insert Failure: ${error?.message || 'No data returned from database.'}`);
     }
+
+    return {
+      ...data,
+      college_name: data.colleges?.name,
+      subject_name: data.subjects?.name,
+      exam_type_name: data.exam_types?.name,
+      original_file_name: data.file_name || data.original_file_name || data.title || 'document.pdf',
+      published_at: data.created_at,
+    } as QuestionPaper;
   }
 
+  // Memory Fallback ONLY if Supabase is unconfigured
   const subject = memorySubjects.find((s) => s.id === paperData.subject_id);
   const examType = memoryExamTypes.find((e) => e.id === paperData.exam_type_id);
   const college = memoryColleges.find((c) => c.id === paperData.college_id) || INITIAL_COLLEGE;
@@ -368,8 +389,9 @@ export async function updateQuestionPaper(
     if (updates.subject_id) payload.subject_id = updates.subject_id;
     if (updates.exam_type_id) payload.exam_type_id = updates.exam_type_id;
     if (updates.mbbs_year) payload.mbbs_year = updates.mbbs_year;
-    if (updates.semester !== undefined) payload.semester = updates.semester;
+    if (updates.exam_attempt) payload.exam_attempt = updates.exam_attempt;
     if (updates.exam_year) payload.exam_year = updates.exam_year;
+    if (updates.description !== undefined) payload.description = updates.description;
     if (updates.status) payload.status = updates.status;
 
     const { data, error } = await supabaseAdmin
@@ -384,7 +406,12 @@ export async function updateQuestionPaper(
       )
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('[PaperMD DB Error] updateQuestionPaper failed:', error);
+      throw new Error(`Database Update Error: ${error.message}`);
+    }
+
+    if (data) {
       return {
         ...data,
         college_name: data.colleges?.name,
@@ -434,12 +461,17 @@ export async function incrementDownloadCount(id: string): Promise<boolean> {
 export async function deleteQuestionPaper(id: string): Promise<boolean> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from('question_papers')
       .update({ status: 'removed', updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
+
+    if (error) {
+      console.error('[PaperMD DB Error] deleteQuestionPaper failed:', error);
+      throw new Error(`Database Delete Error: ${error.message}`);
+    }
 
     if (data) {
       // Clean up storage object if present
@@ -483,7 +515,12 @@ export async function createReport(
       )
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('[PaperMD DB Error] createReport failed:', error);
+      throw new Error(`Database Report Error: ${error.message}`);
+    }
+
+    if (data) {
       const typedData = data as unknown as DbReportRow;
       return {
         id: typedData.id,
@@ -526,7 +563,12 @@ export async function getReports(): Promise<PaperReport[]> {
       )
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.error('[PaperMD DB Error] getReports failed:', error);
+      throw new Error(`Database Reports Error: ${error.message}`);
+    }
+
+    if (data) {
       return (data as unknown as DbReportRow[]).map((r) => ({
         id: r.id,
         paper_id: r.question_paper_id,
@@ -562,7 +604,12 @@ export async function resolveReport(
       )
       .single();
 
-    if (!error && data) {
+    if (error) {
+      console.error('[PaperMD DB Error] resolveReport failed:', error);
+      throw new Error(`Database Resolve Report Error: ${error.message}`);
+    }
+
+    if (data) {
       return {
         id: data.id,
         paper_id: data.question_paper_id,

@@ -109,7 +109,7 @@ export interface Database {
           description: string | null;
           additional_details: string | null;
           mbbs_year: string;
-          semester: string | null;
+          exam_attempt: string;
           exam_year: number;
           academic_year: string | null;
           storage_path: string;
@@ -133,7 +133,7 @@ export interface Database {
           description?: string | null;
           additional_details?: string | null;
           mbbs_year: string;
-          semester?: string | null;
+          exam_attempt?: string;
           exam_year: number;
           academic_year?: string | null;
           storage_path: string;
@@ -157,7 +157,7 @@ export interface Database {
           description?: string | null;
           additional_details?: string | null;
           mbbs_year?: string;
-          semester?: string | null;
+          exam_attempt?: string;
           exam_year?: number;
           academic_year?: string | null;
           storage_path?: string;

@@ -43,6 +43,8 @@ export default function PaperCard({ paper, index }: PaperCardProps) {
         <div className="archive-metadata-line">
           <span>{paper.mbbs_year}</span>
           <span>·</span>
+          <span>{paper.exam_attempt}</span>
+          <span>·</span>
           <span>{paper.file_type === 'pdf' ? 'PDF Document' : 'Scanned Images'}</span>
           <span>·</span>
           <span>{formatFileSize(paper.file_size)}</span>
