@@ -44,15 +44,30 @@ interface DbReportRow {
   };
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+function isProductionEnv(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
 
 function isSupabaseConfigured(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return Boolean(url && !url.includes('xyz-medico.supabase.co'));
 }
 
+function isTableMissingError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const errObj = error as { code?: string; message?: string };
+  const code = errObj.code || '';
+  const message = errObj.message || '';
+  return (
+    code === 'PGRST205' ||
+    code === '42P01' ||
+    message.includes('Could not find the table') ||
+    (message.includes('relation') && message.includes('does not exist'))
+  );
+}
+
 function enforceProductionDbGuard() {
-  if (isProduction && !isSupabaseConfigured()) {
+  if (isProductionEnv() && !isSupabaseConfigured()) {
     console.warn(
       'Production DB Notice: Supabase URL is unconfigured. Operating with in-memory persistence.'
     );
@@ -71,7 +86,13 @@ export async function getColleges(): Promise<College[]> {
       .eq('is_active', true)
       .order('name');
 
-    if (!error && data && data.length > 0) {
+    if (error) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "colleges" not found in Supabase (PGRST205). Please run supabase/schema.sql in the Supabase SQL Editor. Using memory fallback.');
+      } else {
+        console.error('[PaperMD DB Error] getColleges failed:', error);
+      }
+    } else if (data && data.length > 0) {
       return data as College[];
     }
   }
@@ -87,7 +108,13 @@ export async function getSubjects(): Promise<Subject[]> {
       .eq('is_active', true)
       .order('name');
 
-    if (!error && data && data.length > 0) {
+    if (error) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "subjects" not found in Supabase (PGRST205). Please run supabase/schema.sql in the Supabase SQL Editor. Using memory fallback.');
+      } else {
+        console.error('[PaperMD DB Error] getSubjects failed:', error);
+      }
+    } else if (data && data.length > 0) {
       return data as Subject[];
     }
   }
@@ -103,7 +130,13 @@ export async function getExamTypes(): Promise<ExamType[]> {
       .eq('is_active', true)
       .order('name');
 
-    if (!error && data && data.length > 0) {
+    if (error) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "exam_types" not found in Supabase (PGRST205). Please run supabase/schema.sql in the Supabase SQL Editor. Using memory fallback.');
+      } else {
+        console.error('[PaperMD DB Error] getExamTypes failed:', error);
+      }
+    } else if (data && data.length > 0) {
       return data as ExamType[];
     }
   }
@@ -161,11 +194,13 @@ export async function getQuestionPapers(params: PaperFilterParams = {}): Promise
     const { data, count, error } = await query;
 
     if (error) {
-      console.error('[PaperMD DB Error] getQuestionPapers failed:', error);
-      throw new Error(`Database Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" not found in Supabase (PGRST205). Please run supabase/schema.sql in the Supabase SQL Editor. Using memory fallback.');
+      } else {
+        console.error('[PaperMD DB Error] getQuestionPapers failed:', error);
+        throw new Error(`Database Error: ${error.message}`);
+      }
+    } else if (data) {
       const formattedPapers: QuestionPaper[] = (data as DbPaperRow[]).map((p) => ({
         ...p,
         college_name: p.colleges?.name,
@@ -238,11 +273,13 @@ export async function getQuestionPaperById(id: string): Promise<QuestionPaper | 
 
     if (error) {
       if (error.code === 'PGRST116') return null; // Not found
-      console.error('[PaperMD DB Error] getQuestionPaperById failed:', error);
-      throw new Error(`Database Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" missing (PGRST205). Falling back to memory store.');
+      } else {
+        console.error('[PaperMD DB Error] getQuestionPaperById failed:', error);
+        throw new Error(`Database Error: ${error.message}`);
+      }
+    } else if (data) {
       // Increment view count asynchronously
       await supabaseAdmin
         .from('question_papers')
@@ -280,11 +317,13 @@ export async function checkDuplicateHash(fileHash: string): Promise<QuestionPape
       .maybeSingle();
 
     if (error) {
-      console.error('[PaperMD DB Error] checkDuplicateHash failed:', error);
-      throw new Error(`Database Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" missing (PGRST205). Falling back to memory store.');
+      } else {
+        console.error('[PaperMD DB Error] checkDuplicateHash failed:', error);
+        throw new Error(`Database Error: ${error.message}`);
+      }
+    } else if (data) {
       return {
         ...data,
         original_file_name: data.file_name,
@@ -339,22 +378,26 @@ export async function createQuestionPaper(
       )
       .single();
 
-    if (error || !data) {
-      console.error('[PaperMD DB Failure] Supabase insert failed:', error);
-      throw new Error(`Database Insert Failure: ${error?.message || 'No data returned from database.'}`);
+    if (error) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" missing (PGRST205). Saving paper to in-memory store.');
+      } else {
+        console.error('[PaperMD DB Failure] Supabase insert failed:', error);
+        throw new Error(`Database Insert Failure: ${error?.message || 'No data returned from database.'}`);
+      }
+    } else if (data) {
+      return {
+        ...data,
+        college_name: data.colleges?.name,
+        subject_name: data.subjects?.name,
+        exam_type_name: data.exam_types?.name,
+        original_file_name: data.file_name || data.original_file_name || data.title || 'document.pdf',
+        published_at: data.created_at,
+      } as QuestionPaper;
     }
-
-    return {
-      ...data,
-      college_name: data.colleges?.name,
-      subject_name: data.subjects?.name,
-      exam_type_name: data.exam_types?.name,
-      original_file_name: data.file_name || data.original_file_name || data.title || 'document.pdf',
-      published_at: data.created_at,
-    } as QuestionPaper;
   }
 
-  // Memory Fallback ONLY if Supabase is unconfigured
+  // Memory Fallback ONLY if Supabase is unconfigured or tables are uninitialized
   const subject = memorySubjects.find((s) => s.id === paperData.subject_id);
   const examType = memoryExamTypes.find((e) => e.id === paperData.exam_type_id);
   const college = memoryColleges.find((c) => c.id === paperData.college_id) || INITIAL_COLLEGE;
@@ -407,11 +450,13 @@ export async function updateQuestionPaper(
       .single();
 
     if (error) {
-      console.error('[PaperMD DB Error] updateQuestionPaper failed:', error);
-      throw new Error(`Database Update Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" missing (PGRST205). Updating in-memory store.');
+      } else {
+        console.error('[PaperMD DB Error] updateQuestionPaper failed:', error);
+        throw new Error(`Database Update Error: ${error.message}`);
+      }
+    } else if (data) {
       return {
         ...data,
         college_name: data.colleges?.name,
@@ -440,8 +485,8 @@ export async function updateQuestionPaper(
 export async function incrementDownloadCount(id: string): Promise<boolean> {
   enforceProductionDbGuard();
   if (isSupabaseConfigured()) {
-    const { data } = await supabaseAdmin.from('question_papers').select('download_count').eq('id', id).single();
-    if (data) {
+    const { data, error } = await supabaseAdmin.from('question_papers').select('download_count').eq('id', id).single();
+    if (!error && data) {
       await supabaseAdmin
         .from('question_papers')
         .update({ download_count: (data.download_count || 0) + 1 })
@@ -469,11 +514,13 @@ export async function deleteQuestionPaper(id: string): Promise<boolean> {
       .single();
 
     if (error) {
-      console.error('[PaperMD DB Error] deleteQuestionPaper failed:', error);
-      throw new Error(`Database Delete Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "question_papers" missing (PGRST205). Deleting from in-memory store.');
+      } else {
+        console.error('[PaperMD DB Error] deleteQuestionPaper failed:', error);
+        throw new Error(`Database Delete Error: ${error.message}`);
+      }
+    } else if (data) {
       // Clean up storage object if present
       if (data.storage_path && !data.storage_path.startsWith('mock/')) {
         await supabaseAdmin.storage.from('question-papers').remove([data.storage_path]);
@@ -516,11 +563,13 @@ export async function createReport(
       .single();
 
     if (error) {
-      console.error('[PaperMD DB Error] createReport failed:', error);
-      throw new Error(`Database Report Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "reports" missing (PGRST205). Saving report to in-memory store.');
+      } else {
+        console.error('[PaperMD DB Error] createReport failed:', error);
+        throw new Error(`Database Report Error: ${error.message}`);
+      }
+    } else if (data) {
       const typedData = data as unknown as DbReportRow;
       return {
         id: typedData.id,
@@ -564,11 +613,13 @@ export async function getReports(): Promise<PaperReport[]> {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('[PaperMD DB Error] getReports failed:', error);
-      throw new Error(`Database Reports Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "reports" missing (PGRST205). Using memory fallback.');
+      } else {
+        console.error('[PaperMD DB Error] getReports failed:', error);
+        throw new Error(`Database Reports Error: ${error.message}`);
+      }
+    } else if (data) {
       return (data as unknown as DbReportRow[]).map((r) => ({
         id: r.id,
         paper_id: r.question_paper_id,
@@ -605,11 +656,13 @@ export async function resolveReport(
       .single();
 
     if (error) {
-      console.error('[PaperMD DB Error] resolveReport failed:', error);
-      throw new Error(`Database Resolve Report Error: ${error.message}`);
-    }
-
-    if (data) {
+      if (isTableMissingError(error)) {
+        console.warn('[PaperMD DB Notice] Table "reports" missing (PGRST205). Updating in-memory store.');
+      } else {
+        console.error('[PaperMD DB Error] resolveReport failed:', error);
+        throw new Error(`Database Resolve Report Error: ${error.message}`);
+      }
+    } else if (data) {
       return {
         id: data.id,
         paper_id: data.question_paper_id,
