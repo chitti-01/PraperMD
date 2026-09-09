@@ -137,7 +137,7 @@ export default function UploadPage() {
         throw new Error(initData.error?.message || 'Failed to initialize paper upload.');
       }
 
-      const { directUpload, signedUrl, storagePath, paperData } = initData;
+      const { directUpload, signedUrl, storagePath, intentId, paperData } = initData;
 
       // 3. Perform Direct Storage Upload if signedUrl is provided (bypasses Vercel 4.5MB API payload limit!)
       if (directUpload && signedUrl) {
@@ -163,6 +163,7 @@ export default function UploadPage() {
         body: JSON.stringify({
           storagePath,
           paperData,
+          intentId,
           directUpload,
         }),
       });

@@ -356,7 +356,7 @@ export default function ScanPage() {
         throw new Error(initData.error?.message || 'Failed to initialize paper upload.');
       }
 
-      const { directUpload, signedUrl, storagePath, paperData } = initData;
+      const { directUpload, signedUrl, storagePath, intentId, paperData } = initData;
 
       // Direct Upload to Storage if signedUrl is provided
       if (directUpload && signedUrl) {
@@ -378,6 +378,7 @@ export default function ScanPage() {
         body: JSON.stringify({
           storagePath,
           paperData,
+          intentId,
           directUpload,
         }),
       });
