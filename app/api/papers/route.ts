@@ -25,9 +25,21 @@ export async function GET(request: NextRequest) {
       limit,
     });
 
-    return NextResponse.json(result);
-  } catch (error) {
+    return NextResponse.json({
+      success: true,
+      papers: result.papers,
+      total: result.total,
+    });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to fetch question papers';
     console.error('API /papers error:', error);
-    return NextResponse.json({ error: 'Failed to fetch question papers' }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: msg,
+        message: 'Database query failure. Please verify PostgreSQL connection and schema migration state.',
+      },
+      { status: 500 }
+    );
   }
 }

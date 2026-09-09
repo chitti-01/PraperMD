@@ -27,6 +27,7 @@ export default function HomePage() {
   const [recentPapers, setRecentPapers] = useState<QuestionPaper[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -39,10 +40,17 @@ export default function HomePage() {
         const papersData = await papersRes.json();
         const metaData = await metaRes.json();
 
-        setRecentPapers(papersData.papers || []);
+        if (!papersRes.ok || papersData.success === false) {
+          setDbError(papersData.error || papersData.message || 'Database query error.');
+          setRecentPapers([]);
+        } else {
+          setRecentPapers(papersData.papers || []);
+          setDbError(null);
+        }
         setSubjects(metaData.subjects || []);
       } catch (err) {
         console.error('Failed to load homepage data', err);
+        setDbError('Failed to connect to production database server.');
       } finally {
         setLoading(false);
       }
@@ -196,9 +204,15 @@ export default function HomePage() {
           <div className="loading-box card p-8 text-center">
             <p className="subtext">Loading repository entries...</p>
           </div>
+        ) : dbError ? (
+          <div className="card text-center p-8 bg-rose-50 border-rose-200">
+            <h3 className="font-bold text-rose-900 mb-2">Unable to Load Repository Papers</h3>
+            <p className="text-sm text-rose-700 mb-4">{dbError}</p>
+            <p className="text-xs text-muted">Please execute SQL migration files in Supabase SQL Editor (`supabase/migrations/00001_initial_schema.sql` and `00002_upload_intents.sql`).</p>
+          </div>
         ) : recentPapers.length === 0 ? (
           <div className="empty-box card text-center p-8">
-            <p className="subtext mb-4">No papers currently found. Upload the first paper!</p>
+            <p className="subtext mb-4">No question papers match your repository. Upload the first paper!</p>
             <Link href="/upload" className="btn btn-primary">
               Upload Paper
             </Link>

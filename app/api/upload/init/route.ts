@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkDuplicateHash, getColleges } from '@/lib/db';
+import { checkDuplicateHash, createUploadIntent, getColleges } from '@/lib/db';
 import { UploadPaperSchema } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       file_type,
       file_hash,
       page_count,
+      idempotency_key,
     } = body;
 
     // Validate metadata
@@ -124,7 +125,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Prepare storage path
+    // 3. Prepare canonical storage path & idempotency key
     const safeFilename = file_name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const isPdf = file_type === 'application/pdf' || safeFilename.endsWith('.pdf');
     const finalFileType = isPdf ? 'pdf' : (page_count && page_count > 1) ? 'multi_image' : 'image';
@@ -134,7 +135,48 @@ export async function POST(request: NextRequest) {
       ? colleges[0]
       : { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', name: 'Government Medical College (GMC)' };
 
-    const storagePath = `${defaultCollege.id}/${Date.now()}_${safeFilename}`;
+    // Idempotency Key logic: request key or fallback to logical upload key
+    const key = idempotency_key || `idemp_${file_hash.substring(0, 32)}`;
+    const intentId = crypto.randomUUID();
+    const canonicalStoragePath = `${defaultCollege.id}/${intentId}_${safeFilename}`;
+
+    // 4. Create persistent upload intent in PostgreSQL with canonical storage path.
+    // HARD FAILURE: If creation of upload_intents fails, ABORT upload immediately!
+    const intent = await createUploadIntent({
+      id: intentId,
+      idempotency_key: key,
+      college_id: defaultCollege.id,
+      subject_id: validated.subject_id,
+      exam_type_id: validated.exam_type_id,
+      mbbs_year: validated.mbbs_year as '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS',
+      exam_attempt: validated.exam_attempt,
+      exam_year: validated.exam_year,
+      academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
+      title: validated.title,
+      description: validated.description,
+      storage_path: canonicalStoragePath,
+      file_name: safeFilename,
+      file_type: finalFileType,
+      file_size,
+      file_hash,
+      page_count: page_count || 1,
+    });
+
+    if (!intent || !intent.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'INTENT_CREATION_FAILED',
+            message: 'Database Intent Error: Failed to record persistent upload intent in PostgreSQL. Upload aborted.',
+          },
+        },
+        { status: 500 }
+      );
+    }
+
+    // Always use intent's canonical storage path (handles existing intent retry seamlessly)
+    const storagePath = intent.storage_path;
 
     const paperData = {
       college_id: defaultCollege.id,
@@ -155,13 +197,11 @@ export async function POST(request: NextRequest) {
     };
 
     if (isSupabaseConfigured()) {
-      // Create presigned upload URL
       let { data, error } = await supabaseAdmin.storage
         .from('question-papers')
         .createSignedUploadUrl(storagePath);
 
       if (error) {
-        // Auto-create bucket if missing
         const isBucketMissing =
           error.message?.toLowerCase().includes('not found') ||
           (error as { statusCode?: string }).statusCode === '404';
@@ -188,16 +228,17 @@ export async function POST(request: NextRequest) {
           token: data.token,
           path: data.path,
           storagePath,
+          intentId: intent.id,
           paperData,
         });
       }
     }
 
-    // Fallback mode if Supabase is not configured or in dev memory mode
     return NextResponse.json({
       success: true,
       directUpload: false,
       storagePath,
+      intentId: intent.id,
       paperData,
     });
   } catch (err: unknown) {

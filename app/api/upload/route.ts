@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { calculateBufferHash } from '@/lib/hash';
-import { checkDuplicateHash, createQuestionPaper, getColleges } from '@/lib/db';
+import { checkDuplicateHash, createUploadIntent, finalizeQuestionPaperAtomic, getColleges } from '@/lib/db';
 import { UploadPaperSchema } from '@/lib/validation';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -20,7 +20,7 @@ function isSupabaseConfigured(): boolean {
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Rate Limiting Check (Max 10 upload requests per 10 minutes per IP)
+  // 1. Rate Limiting Check
   const rateLimit = checkRateLimit(request, {
     maxRequests: 10,
     windowMs: 10 * 60 * 1000,
@@ -125,10 +125,36 @@ export async function POST(request: NextRequest) {
       ? colleges[0]
       : { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', name: 'Government Medical College (GMC)' };
 
-    // Generate safe deterministic storage path
-    const storagePath = `${defaultCollege.id}/${Date.now()}_${safeFilename}`;
+    // Support client-supplied idempotency key via header or form field
+    const reqKey = request.headers.get('x-idempotency-key') || (formData.get('idempotency_key') as string);
+    const key = reqKey || `idemp_${fileHash.substring(0, 32)}`;
+    const intentId = crypto.randomUUID();
+    const canonicalStoragePath = `${defaultCollege.id}/${intentId}_${safeFilename}`;
 
-    // 4. Upload file object to private Supabase Storage bucket 'question-papers' if configured
+    // 4. Persistent Intent Creation in PostgreSQL with canonical storage path
+    const intent = await createUploadIntent({
+      id: intentId,
+      idempotency_key: key,
+      college_id: defaultCollege.id,
+      subject_id: validated.subject_id,
+      exam_type_id: validated.exam_type_id,
+      mbbs_year: validated.mbbs_year as '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS',
+      exam_attempt: validated.exam_attempt,
+      exam_year: validated.exam_year,
+      academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
+      title: validated.title,
+      description: validated.description,
+      storage_path: canonicalStoragePath,
+      file_name: safeFilename,
+      file_type: fileType,
+      file_size: totalBytes,
+      file_hash: fileHash,
+      page_count: pageCount,
+    });
+
+    const storagePath = intent.storage_path;
+
+    // 5. Binary Storage Upload to canonical path
     let storageUploaded = false;
     if (isSupabaseConfigured()) {
       let { error: storageError } = await supabaseAdmin.storage
@@ -139,72 +165,25 @@ export async function POST(request: NextRequest) {
         });
 
       if (storageError) {
-        console.error('Supabase Storage Upload Error:', storageError);
-
-        // Auto-create bucket if missing
-        const isBucketMissing =
-          storageError.message?.toLowerCase().includes('not found') ||
-          (storageError as { statusCode?: string }).statusCode === '404' ||
-          (storageError as { error?: string }).error === 'Bucket not found';
-
-        if (isBucketMissing) {
-          try {
-            const { error: bucketCreateErr } = await supabaseAdmin.storage.createBucket('question-papers', {
-              public: false,
-            });
-
-            if (!bucketCreateErr) {
-              const { error: retryError } = await supabaseAdmin.storage
-                .from('question-papers')
-                .upload(storagePath, buffer, {
-                  contentType: firstFile.type || 'application/pdf',
-                  upsert: false,
-                });
-              if (!retryError) {
-                storageError = null;
-                storageUploaded = true;
-              }
-            }
-          } catch (bucketErr) {
-            console.error('Failed to auto-create question-papers bucket:', bucketErr);
-          }
-        }
-
-        if (storageError && process.env.NODE_ENV === 'production') {
-          return NextResponse.json(
-            { error: `Storage Error: Failed to upload question paper file (${storageError.message}). Please verify that the 'question-papers' storage bucket exists in Supabase Storage.` },
-            { status: 500 }
-          );
-        }
-      } else {
-        storageUploaded = true;
+        return NextResponse.json(
+          { error: `Storage Error: Failed to upload file (${storageError.message}).` },
+          { status: 500 }
+        );
       }
+      storageUploaded = true;
     }
 
-    // 5. Create database record atomically with Storage cleanup fallback
+    // 6. Atomic Finalization with Storage Verification and Read-After-Write
     let paper;
     try {
-      paper = await createQuestionPaper({
-        college_id: defaultCollege.id,
-        subject_id: validated.subject_id,
-        exam_type_id: validated.exam_type_id,
-        mbbs_year: validated.mbbs_year as '1st MBBS' | '2nd MBBS' | '3rd MBBS' | 'Final MBBS',
-        exam_attempt: validated.exam_attempt,
-        exam_year: validated.exam_year,
-        academic_year: validated.academic_year || `${validated.exam_year - 1}-${validated.exam_year}`,
-        title: validated.title,
-        description: validated.description,
-        storage_path: storagePath,
-        file_type: fileType,
-        file_size: totalBytes,
-        file_hash: fileHash,
-        original_file_name: safeFilename,
-        page_count: pageCount,
-      });
+      paper = await finalizeQuestionPaperAtomic(intent.id);
     } catch (dbError: unknown) {
-      // ATOMIC CLEANUP: If DB insert fails after storage upload succeeds, delete orphaned file from Storage
       if (storageUploaded) {
-        await supabaseAdmin.storage.from('question-papers').remove([storagePath]);
+        // Safe Cleanup Check: ONLY remove storage file if intent status is not READY
+        const { data: checkIntent } = await supabaseAdmin.from('upload_intents').select('status').eq('id', intent.id).maybeSingle();
+        if (!checkIntent || checkIntent.status !== 'READY') {
+          await supabaseAdmin.storage.from('question-papers').remove([storagePath]);
+        }
       }
       throw dbError;
     }
