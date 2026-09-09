@@ -20,7 +20,7 @@ export function checkRateLimit(
   const realIp = request.headers.get('x-real-ip');
   const ip = (forwardedFor ? forwardedFor.split(',')[0] : realIp) || '127.0.0.1';
 
-  const route = request.nextUrl.pathname;
+  const route = request.nextUrl?.pathname || new URL(request.url).pathname;
   const key = `${ip}:${route}`;
   const now = Date.now();
 
