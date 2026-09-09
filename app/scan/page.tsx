@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Subject, ExamType, QuestionPaper } from '@/lib/types';
 import { calculateClientFileHash } from '@/lib/image-optimizer';
+import { PDFDocument } from 'pdf-lib';
 import {
   Camera,
   RotateCcw,
@@ -306,12 +307,30 @@ export default function ScanPage() {
     setSubmitting(true);
 
     try {
-      const primaryFile = new File([pages[0].blob], `scanned_paper_page_1.jpg`, {
-        type: 'image/jpeg',
-      });
+      // Generate a single multi-page PDF combining ALL scanned pages in exact scanned order
+      const pdfDoc = await PDFDocument.create();
+      for (const page of pages) {
+        const imageBytes = await page.blob.arrayBuffer();
+        const image = await pdfDoc.embedJpg(imageBytes);
+        const pdfPage = pdfDoc.addPage([image.width, image.height]);
+        pdfPage.drawImage(image, {
+          x: 0,
+          y: 0,
+          width: image.width,
+          height: image.height,
+        });
+      }
 
-      const fileHash = await calculateClientFileHash(primaryFile);
-      const totalSize = pages.reduce((acc, p) => acc + p.blob.size, 0);
+      const pdfBytes = await pdfDoc.save();
+      const timestamp = Date.now();
+      const finalPdfFile = new File(
+        [pdfBytes.buffer as ArrayBuffer],
+        `scanned_paper_${timestamp}.pdf`,
+        { type: 'application/pdf' }
+      );
+
+      const fileHash = await calculateClientFileHash(finalPdfFile);
+      const pdfSize = finalPdfFile.size;
 
       // Initialize Direct Upload API Request
       const initRes = await fetch('/api/upload/init', {
@@ -326,9 +345,9 @@ export default function ScanPage() {
           exam_year: Number(examYear),
           academic_year: academicYear,
           description,
-          file_name: `scanned_paper_${Date.now()}.jpg`,
-          file_size: totalSize,
-          file_type: 'image/jpeg',
+          file_name: finalPdfFile.name,
+          file_size: pdfSize,
+          file_type: 'application/pdf',
           file_hash: fileHash,
           page_count: pages.length,
         }),
@@ -362,8 +381,8 @@ export default function ScanPage() {
       if (directUpload && signedUrl) {
         const uploadRes = await fetch(signedUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': 'image/jpeg' },
-          body: primaryFile,
+          headers: { 'Content-Type': 'application/pdf' },
+          body: finalPdfFile,
         });
 
         if (!uploadRes.ok) {
