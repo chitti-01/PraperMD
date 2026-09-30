@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Upload, Grid, Shield, Search, Camera } from 'lucide-react';
+import { BookOpen, Upload } from 'lucide-react';
 
 export default function Header() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: 'Browse', href: '/browse', icon: Search },
-    { label: 'Scan', href: '/scan', icon: Camera },
-    { label: 'Upload', href: '/upload', icon: Upload },
-    { label: 'Coverage', href: '/coverage', icon: Grid },
-    { label: 'Admin', href: '/admin', icon: Shield },
+    { label: 'Papers', href: '/browse' },
+    { label: 'Subjects', href: '/browse' },
+    { label: 'Upload', href: '/upload' },
+    { label: 'Coverage', href: '/coverage' },
+    { label: 'Admin', href: '/admin', isSubtle: true },
   ];
 
   return (
@@ -33,9 +33,11 @@ export default function Header() {
             const isActive = pathname === item.href;
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
-                className={`nav-link ${isActive ? 'nav-link-active' : ''}`}
+                className={`nav-link ${isActive ? 'nav-link-active' : ''} ${
+                  item.isSubtle ? 'nav-link-subtle' : ''
+                }`}
               >
                 <span>{item.label}</span>
               </Link>
@@ -44,13 +46,9 @@ export default function Header() {
         </nav>
 
         <div className="header-cta">
-          <Link href="/scan" className="btn btn-primary btn-sm btn-header-scan">
-            <Camera className="w-3.5 h-3.5" />
-            <span>Scan Paper</span>
-          </Link>
-          <Link href="/upload" className="btn btn-secondary btn-sm header-upload-btn">
+          <Link href="/upload" className="btn btn-primary btn-sm header-upload-btn">
             <Upload className="w-3.5 h-3.5" />
-            <span>Upload</span>
+            <span>Upload Paper</span>
           </Link>
         </div>
       </div>
@@ -63,7 +61,7 @@ export default function Header() {
           background-color: rgba(247, 246, 240, 0.96);
           backdrop-filter: blur(8px);
           border-bottom: 2px solid var(--border-dark);
-          height: 72px;
+          height: 64px;
           display: flex;
           align-items: center;
         }
@@ -81,8 +79,8 @@ export default function Header() {
         }
 
         .brand-symbol {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
           background-color: var(--primary-yellow);
           border: 2px solid var(--border-dark);
           border-radius: var(--radius-sm);
@@ -99,7 +97,7 @@ export default function Header() {
 
         .brand-name {
           font-family: var(--font-display);
-          font-size: 1.25rem;
+          font-size: 1.15rem;
           font-weight: 800;
           color: var(--text-primary);
           letter-spacing: 0.04em;
@@ -108,25 +106,25 @@ export default function Header() {
 
         .brand-sub {
           font-family: var(--font-mono);
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           color: var(--text-muted);
           font-weight: 700;
           letter-spacing: 0.08em;
-          margin-top: 0.2rem;
+          margin-top: 0.15rem;
         }
 
         .nav-menu {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.25rem;
         }
 
         .nav-link {
           font-family: var(--font-display);
-          font-size: 0.9375rem;
+          font-size: 0.875rem;
           font-weight: 700;
           color: var(--text-secondary);
-          padding: 0.35rem 0.85rem;
+          padding: 0.35rem 0.75rem;
           border-radius: var(--radius-sm);
           border: 1.5px solid transparent;
           text-transform: uppercase;
@@ -146,10 +144,14 @@ export default function Header() {
           box-shadow: 2px 2px 0 var(--border-dark);
         }
 
+        .nav-link-subtle {
+          color: var(--text-muted);
+          font-weight: 600;
+        }
+
         .header-cta {
           display: flex;
           align-items: center;
-          gap: 0.625rem;
         }
 
         .text-dark {
@@ -163,36 +165,22 @@ export default function Header() {
           .nav-menu {
             display: none;
           }
-          .header-upload-btn {
-            display: none;
-          }
           .brand-group {
             gap: 0.5rem;
           }
           .brand-symbol {
-            width: 34px;
-            height: 34px;
-            border-radius: 4px;
+            width: 32px;
+            height: 32px;
             box-shadow: 1.5px 1.5px 0 var(--border-dark);
           }
           .brand-name {
-            font-size: 1.05rem;
-            line-height: 1;
+            font-size: 1rem;
           }
           .brand-sub {
-            font-size: 0.6rem;
-            white-space: nowrap;
-            letter-spacing: 0.04em;
-          }
-          .btn-header-scan {
-            padding: 0.35rem 0.75rem;
-            font-size: 0.8125rem;
-            min-height: 40px;
-            border-radius: var(--radius-sm);
+            font-size: 0.55rem;
           }
         }
       `}</style>
     </header>
   );
 }
-

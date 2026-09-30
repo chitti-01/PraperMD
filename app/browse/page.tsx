@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { QuestionPaper, Subject, ExamType } from '@/lib/types';
 import PaperCard from '@/components/PaperCard';
 import PaperFilter from '@/components/PaperFilter';
-import { SearchX, Archive } from 'lucide-react';
+import { SearchX, Archive, RefreshCw } from 'lucide-react';
 
 function BrowseContent() {
   const searchParams = useSearchParams();
@@ -15,6 +15,7 @@ function BrowseContent() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   const [filters, setFilters] = useState({
     query: searchParams.get('query') || '',
@@ -40,31 +41,41 @@ function BrowseContent() {
     loadMetadata();
   }, []);
 
-  useEffect(() => {
-    async function fetchPapers() {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams();
-        if (filters.query) params.set('query', filters.query);
-        if (filters.subjectId) params.set('subjectId', filters.subjectId);
-        if (filters.examTypeId) params.set('examTypeId', filters.examTypeId);
-        if (filters.mbbsYear) params.set('mbbsYear', filters.mbbsYear);
-        if (filters.examAttempt) params.set('examAttempt', filters.examAttempt);
-        if (filters.examYear) params.set('examYear', filters.examYear);
-        if (filters.sortBy) params.set('sortBy', filters.sortBy);
+  const fetchPapers = async () => {
+    setLoading(true);
+    setHasError(false);
+    try {
+      const params = new URLSearchParams();
+      if (filters.query) params.set('query', filters.query);
+      if (filters.subjectId) params.set('subjectId', filters.subjectId);
+      if (filters.examTypeId) params.set('examTypeId', filters.examTypeId);
+      if (filters.mbbsYear) params.set('mbbsYear', filters.mbbsYear);
+      if (filters.examAttempt) params.set('examAttempt', filters.examAttempt);
+      if (filters.examYear) params.set('examYear', filters.examYear);
+      if (filters.sortBy) params.set('sortBy', filters.sortBy);
 
-        const res = await fetch(`/api/papers?${params.toString()}`);
-        const data = await res.json();
+      const res = await fetch(`/api/papers?${params.toString()}`);
+      const data = await res.json();
 
+      if (!res.ok || data.success === false) {
+        console.error('Papers query error:', data.error);
+        setHasError(true);
+        setPapers([]);
+        setTotal(0);
+      } else {
         setPapers(data.papers || []);
         setTotal(data.total || 0);
-      } catch (err) {
-        console.error('Failed to fetch papers', err);
-      } finally {
-        setLoading(false);
+        setHasError(false);
       }
+    } catch (err) {
+      console.error('Failed to fetch papers', err);
+      setHasError(true);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchPapers();
   }, [filters]);
 
@@ -107,7 +118,18 @@ function BrowseContent() {
 
       {loading ? (
         <div className="loading-box card p-12 text-center font-mono">
-          <p className="subtext">FETCHING ARCHIVE ENTRIES FROM PRODUCTION DB...</p>
+          <p className="subtext">Loading repository papers...</p>
+        </div>
+      ) : hasError ? (
+        <div className="card text-center p-8 bg-card border-dark">
+          <h3 className="h2-title mb-2">Unable to load question papers</h3>
+          <p className="subtext mb-4 max-w-md mx-auto font-mono text-xs">
+            We couldn&apos;t reach the repository database. Please try refreshing or checking your connection.
+          </p>
+          <button onClick={fetchPapers} className="btn btn-secondary btn-sm inline-flex items-center">
+            <RefreshCw className="w-3.5 h-3.5 mr-1" />
+            <span>Try again</span>
+          </button>
         </div>
       ) : papers.length === 0 ? (
         <div className="empty-state card p-12 text-center">
@@ -121,7 +143,7 @@ function BrowseContent() {
           </button>
         </div>
       ) : (
-        <div className="archive-rows-list">
+        <div className="papers-grid">
           {papers.map((paper, idx) => (
             <PaperCard key={paper.id} paper={paper} index={idx + 1} />
           ))}
@@ -130,29 +152,18 @@ function BrowseContent() {
 
       <style jsx>{`
         .browse-header {
-          margin-top: 0.75rem;
-          margin-bottom: 1.25rem;
+          padding-top: 0.5rem;
         }
 
-        .archive-rows-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
+        .papers-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1.25rem;
         }
 
-        .mx-auto {
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        .text-dark {
-          color: #111827;
-        }
-
-        @media (max-width: 639px) {
-          .browse-header {
-            margin-top: 0.5rem;
-            margin-bottom: 1rem;
+        @media (max-width: 767px) {
+          .papers-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>
@@ -162,9 +173,12 @@ function BrowseContent() {
 
 export default function BrowsePage() {
   return (
-    <Suspense fallback={<div className="container p-8 text-center font-mono">Loading archive...</div>}>
+    <Suspense fallback={
+      <div className="container py-12 text-center font-mono">
+        <p>Loading paper archive...</p>
+      </div>
+    }>
       <BrowseContent />
     </Suspense>
   );
 }
-
