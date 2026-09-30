@@ -17,10 +17,10 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
   return (
     <div className="viewer-card card">
       <div className="viewer-toolbar">
-        <div className="toolbar-info">
-          <FileText className="w-5 h-5 text-teal" />
+        <div className="toolbar-info font-mono">
+          <FileText className="w-5 h-5 text-yellow" />
           <span className="toolbar-filename">{paper.original_file_name}</span>
-          <span className="badge badge-slate">{paper.file_type.toUpperCase()}</span>
+          <span className="badge badge-yellow">{paper.file_type.toUpperCase()}</span>
         </div>
 
         <div className="toolbar-controls">
@@ -31,7 +31,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           >
             <ZoomOut className="w-4 h-4" />
           </button>
-          <span className="zoom-indicator">{zoomLevel}%</span>
+          <span className="zoom-indicator font-mono">{zoomLevel}%</span>
           <button
             onClick={() => setZoomLevel((z) => Math.min(200, z + 25))}
             className="btn btn-secondary btn-sm"
@@ -68,7 +68,6 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
               alt={`${paper.title} Page ${currentSlide}`}
               className="scanned-doc-img"
               onError={(e) => {
-                // Fallback to placeholder if file stream is missing or mock
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
@@ -77,7 +76,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
       </div>
 
       {!isPdf && paper.page_count > 1 && (
-        <div className="carousel-nav">
+        <div className="carousel-nav font-mono">
           <button
             disabled={currentSlide <= 1}
             onClick={() => setCurrentSlide((s) => Math.max(1, s - 1))}
@@ -87,7 +86,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
             Previous Page
           </button>
           <span className="page-indicator">
-            Page {currentSlide} of {paper.page_count}
+            PAGE {currentSlide} OF {paper.page_count}
           </span>
           <button
             disabled={currentSlide >= paper.page_count}
@@ -104,9 +103,10 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         .viewer-card {
           padding: 0;
           overflow: hidden;
-          background-color: #0f172a;
+          background-color: #111827;
           color: #ffffff;
-          border: 1px solid #1e293b;
+          border: var(--border-width-bold) solid var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .viewer-toolbar {
@@ -114,8 +114,8 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           align-items: center;
           justify-content: space-between;
           padding: 0.875rem 1.25rem;
-          background-color: #1e293b;
-          border-bottom: 1px solid #334155;
+          background-color: #1F2937;
+          border-bottom: 2px solid var(--border-dark);
           flex-wrap: wrap;
           gap: 0.75rem;
         }
@@ -127,9 +127,10 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         }
 
         .toolbar-filename {
-          font-size: 0.9375rem;
-          font-weight: 600;
-          color: #f8fafc;
+          font-family: var(--font-mono);
+          font-size: 0.875rem;
+          font-weight: 700;
+          color: #ffffff;
         }
 
         .toolbar-controls {
@@ -140,28 +141,30 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
 
         .zoom-indicator {
           font-size: 0.8125rem;
-          color: #94a3b8;
+          color: var(--primary-yellow);
+          font-weight: 700;
           min-width: 48px;
           text-align: center;
         }
 
         .viewer-stage {
-          min-height: 480px;
+          min-height: 520px;
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 2rem;
-          background-color: #090d16;
+          background-color: #0B0F19;
           overflow: auto;
         }
 
         .pdf-embed-box {
           width: 100%;
-          max-width: 900px;
-          height: 650px;
-          border-radius: var(--radius-md);
+          max-width: 920px;
+          height: 680px;
+          border-radius: var(--radius-sm);
           overflow: hidden;
           background-color: #ffffff;
+          border: 2px solid var(--border-dark);
         }
 
         .pdf-iframe {
@@ -171,7 +174,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         }
 
         .image-preview-box {
-          max-width: 900px;
+          max-width: 920px;
           width: 100%;
           display: flex;
           justify-content: center;
@@ -180,8 +183,9 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         .scanned-doc-img {
           max-width: 100%;
           height: auto;
-          border-radius: var(--radius-md);
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+          border-radius: var(--radius-sm);
+          border: 2px solid var(--border-dark);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         .carousel-nav {
@@ -189,14 +193,19 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           align-items: center;
           justify-content: space-between;
           padding: 0.75rem 1.25rem;
-          background-color: #1e293b;
-          border-top: 1px solid #334155;
+          background-color: #1F2937;
+          border-top: 2px solid var(--border-dark);
         }
 
         .page-indicator {
-          font-size: 0.875rem;
-          color: #cbd5e1;
-          font-weight: 600;
+          font-size: 0.8125rem;
+          color: #ffffff;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+        }
+
+        .text-yellow {
+          color: var(--primary-yellow);
         }
 
         @media (max-width: 639px) {
@@ -211,7 +220,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 220px;
+            max-width: 200px;
           }
 
           .toolbar-controls {
@@ -220,15 +229,12 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           }
 
           .viewer-stage {
-            min-height: 300px;
+            min-height: 320px;
             padding: 0.75rem;
-          }
-
-          .pdf-placeholder, .image-mock {
-            padding: 1.25rem 0.875rem;
           }
         }
       `}</style>
     </div>
   );
 }
+

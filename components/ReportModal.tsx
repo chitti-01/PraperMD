@@ -57,11 +57,11 @@ export default function ReportModal({
     <div className="modal-overlay">
       <div className="modal-card">
         <div className="modal-header">
-          <div className="modal-title">
+          <div className="modal-title font-display">
             <AlertTriangle className="w-5 h-5 text-amber" />
-            <span>Report an Issue</span>
+            <span>REPORT AN ISSUE</span>
           </div>
-          <button onClick={onClose} className="close-btn">
+          <button onClick={onClose} className="close-btn" aria-label="Close modal">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -69,25 +69,25 @@ export default function ReportModal({
         {success ? (
           <div className="success-state">
             <CheckCircle className="w-12 h-12 text-emerald mb-2" />
-            <h3>Report Submitted</h3>
-            <p className="text-secondary">
+            <h3 className="font-display text-xl font-bold">Report Submitted</h3>
+            <p className="subtext text-center mt-1">
               Thank you. The medical paper review team will inspect this paper.
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
-            <p className="target-paper-title mb-4">
+            <p className="target-paper-title mb-4 font-mono">
               Target Paper: <strong>{paperTitle}</strong>
             </p>
 
             {error && <div className="error-box mb-4">{error}</div>}
 
             <div className="form-group">
-              <label className="form-label">Select Issue Reason *</label>
+              <label className="form-label font-mono">Select Issue Reason *</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as ReportReason)}
-                className="input-field"
+                className="input-field font-mono"
                 required
               >
                 <option value="wrong_subject">Wrong Subject classification</option>
@@ -101,7 +101,7 @@ export default function ReportModal({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Additional Details (Optional)</label>
+              <label className="form-label font-mono">Additional Details (Optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -139,29 +139,40 @@ export default function ReportModal({
           justify-content: space-between;
           margin-bottom: 1.25rem;
           padding-bottom: 0.875rem;
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 2px solid var(--border-dark);
         }
 
         .modal-title {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          font-size: 1.125rem;
-          font-weight: 700;
+          font-size: 1.25rem;
+          font-weight: 800;
           color: var(--text-primary);
+          letter-spacing: 0.02em;
         }
 
         .close-btn {
           background: none;
-          border: none;
+          border: 1.5px solid var(--border-dark);
+          border-radius: var(--radius-sm);
+          padding: 0.25rem;
           cursor: pointer;
-          color: var(--text-muted);
+          color: var(--text-primary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .close-btn:hover {
+          background-color: var(--primary-yellow-light);
         }
 
         .target-paper-title {
-          font-size: 0.875rem;
-          color: var(--text-secondary);
-          background-color: var(--bg-subtle);
+          font-size: 0.8125rem;
+          color: var(--text-primary);
+          background-color: var(--bg-surface-subtle);
+          border: 1.5px solid var(--border-medium);
           padding: 0.625rem 0.875rem;
           border-radius: var(--radius-sm);
         }
@@ -186,11 +197,21 @@ export default function ReportModal({
         .error-box {
           background-color: var(--accent-rose-light);
           color: #9f1239;
+          border: 1.5px solid var(--accent-rose);
           padding: 0.625rem 0.875rem;
           border-radius: var(--radius-sm);
           font-size: 0.875rem;
+          font-weight: 600;
+        }
+
+        .text-amber {
+          color: var(--accent-amber);
+        }
+        .text-emerald {
+          color: var(--accent-emerald);
         }
       `}</style>
     </div>
   );
 }
+

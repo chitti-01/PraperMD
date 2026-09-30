@@ -18,18 +18,18 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
           <table className="coverage-matrix-table">
             <thead>
               <tr>
-                <th>Medical Subject</th>
+                <th className="font-mono">Medical Subject</th>
                 {years.map((yr) => (
-                  <th key={yr}>{yr}</th>
+                  <th key={yr} className="font-mono">{yr}</th>
                 ))}
-                <th>Coverage</th>
-                <th>Contribute</th>
+                <th className="font-mono">Coverage Ratio</th>
+                <th className="font-mono">Contribute</th>
               </tr>
             </thead>
             <tbody>
               {matrix.map((row) => (
                 <tr key={row.subjectId}>
-                  <td className="subject-cell">
+                  <td className="subject-cell font-display">
                     <span>{row.subjectName}</span>
                   </td>
 
@@ -51,7 +51,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                             className="dash-missing touch-target"
                             title={`Scan paper for ${row.subjectName} (${yr})`}
                           >
-                            <Minus className="w-4 h-4 text-light inline" />
+                            <Minus className="w-4 h-4 text-muted inline" />
                           </Link>
                         )}
                       </td>
@@ -59,7 +59,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                   })}
 
                   <td className="count-cell">
-                    <span className="badge badge-teal">{row.paperCount} / {years.length} Years</span>
+                    <span className="badge badge-yellow font-mono">{row.paperCount} / {years.length} Years</span>
                   </td>
 
                   <td>
@@ -86,8 +86,8 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         {matrix.map((row) => (
           <div key={row.subjectId} className="card mobile-coverage-card">
             <div className="card-head">
-              <h3 className="mobile-subject-title">{row.subjectName}</h3>
-              <span className="badge badge-teal">{row.paperCount} / {years.length} Years</span>
+              <h3 className="mobile-subject-title font-display">{row.subjectName}</h3>
+              <span className="badge badge-yellow font-mono">{row.paperCount} / {years.length} Years</span>
             </div>
 
             <div className="mobile-years-grid">
@@ -95,7 +95,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                 const hasPaper = row.yearCoverage[yr];
                 return (
                   <div key={yr} className={`year-status-box ${hasPaper ? 'year-box-found' : 'year-box-missing'}`}>
-                    <span className="year-label">{yr}</span>
+                    <span className="year-label font-mono">{yr}</span>
                     {hasPaper ? (
                       <Link
                         href={`/browse?subjectId=${row.subjectId}&examYear=${yr}`}
@@ -108,7 +108,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
                         href={`/scan?subjectId=${row.subjectId}&examYear=${yr}`}
                         className="status-icon-link"
                       >
-                        <Minus className="w-4 h-4 text-light" />
+                        <Minus className="w-4 h-4 text-muted" />
                       </Link>
                     )}
                   </div>
@@ -133,6 +133,9 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         .desktop-matrix-table {
           padding: 0;
           overflow: hidden;
+          background-color: #FFFFFF;
+          border: var(--border-width-bold) solid var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .mobile-coverage-cards {
@@ -165,7 +168,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         }
 
         .mobile-subject-title {
-          font-size: 1rem;
+          font-size: 1.05rem;
           font-weight: 800;
           color: var(--text-primary);
         }
@@ -184,24 +187,24 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
           padding: 0.5rem 0.25rem;
           border-radius: var(--radius-sm);
           gap: 0.25rem;
-          border: 1px solid var(--border-subtle);
+          border: 1.5px solid var(--border-dark);
         }
 
         .year-box-found {
-          background-color: #F0FDF4;
-          border-color: #DCFCE7;
+          background-color: var(--accent-emerald-light);
+          border-color: var(--accent-emerald);
         }
 
         .year-box-missing {
           background-color: var(--bg-surface-subtle);
-          border-color: var(--border-subtle);
+          border-color: var(--border-medium);
         }
 
         .year-label {
           font-family: var(--font-mono);
           font-size: 0.75rem;
           font-weight: 700;
-          color: var(--text-secondary);
+          color: var(--text-primary);
         }
 
         .table-responsive {
@@ -218,7 +221,7 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         .coverage-matrix-table td {
           padding: 1rem 1.25rem;
           text-align: center;
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 1.5px solid var(--border-dark);
         }
 
         .coverage-matrix-table th:first-child,
@@ -231,12 +234,13 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
           font-family: var(--font-mono);
           font-size: 0.8125rem;
           text-transform: uppercase;
-          color: var(--text-muted);
+          color: var(--text-primary);
           letter-spacing: 0.05em;
+          border-bottom: 2px solid var(--border-dark);
         }
 
         .subject-cell {
-          font-size: 0.9375rem;
+          font-size: 1rem;
           font-weight: 700;
           color: var(--text-primary);
         }
@@ -249,11 +253,11 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
         }
 
         .check-link:hover {
-          transform: scale(1.2);
+          transform: scale(1.25);
         }
 
         .dash-missing {
-          color: var(--text-light);
+          color: var(--text-muted);
         }
 
         .count-cell {
@@ -264,14 +268,15 @@ export default function CoverageGrid({ years, matrix }: CoverageGridProps) {
           width: 100%;
         }
 
-        :global(.text-emerald) {
+        .text-emerald {
           color: var(--accent-emerald);
         }
 
-        :global(.text-light) {
-          color: var(--text-light);
+        .text-muted {
+          color: var(--text-muted);
         }
       `}</style>
     </div>
   );
 }
+

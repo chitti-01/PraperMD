@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { QuestionPaper } from '@/lib/types';
-import { Eye, Download } from 'lucide-react';
+import { Eye, Download, FileText, ArrowUpRight } from 'lucide-react';
 
 interface PaperCardProps {
   paper: QuestionPaper;
@@ -11,6 +11,7 @@ interface PaperCardProps {
 
 export default function PaperCard({ paper, index }: PaperCardProps) {
   const formatFileSize = (bytes: number) => {
+    if (!bytes) return '0 KB';
     if (bytes < 1024 * 1024) {
       return `${(bytes / 1024).toFixed(0)} KB`;
     }
@@ -18,191 +19,210 @@ export default function PaperCard({ paper, index }: PaperCardProps) {
   };
 
   return (
-    <div className="archive-paper-entry">
+    <div className="archive-paper-card">
       {index !== undefined && (
-        <div className="archive-number">
-          {index.toString().padStart(2, '0')}
+        <div className="archive-index-badge font-mono">
+          #{index.toString().padStart(2, '0')}
         </div>
       )}
 
-      <div className="archive-main-info">
-        <div className="archive-eyebrow-row">
-          <span className="badge badge-teal">{paper.subject_name || 'Subject'}</span>
-          <span className="archive-exam-type">{paper.exam_type_name || 'Exam'}</span>
-          <span className="archive-year">Year: {paper.exam_year}</span>
+      <div className="archive-main-content">
+        <div className="archive-tags-strip font-mono">
+          <span className="badge badge-yellow">{paper.subject_name || 'Medical Subject'}</span>
+          <span className="badge badge-teal">{paper.exam_type_name || 'Exam'}</span>
+          <span className="badge badge-slate">{paper.mbbs_year || 'MBBS'}</span>
+          <span className="badge badge-emerald">YEAR: {paper.exam_year}</span>
+          {paper.academic_year && <span className="archive-academic-year font-mono">• {paper.academic_year}</span>}
         </div>
 
-        <h3 className="archive-title">
-          <Link href={`/papers/${paper.id}`}>{paper.title}</Link>
+        <h3 className="archive-paper-title font-display">
+          <Link href={`/papers/${paper.id}`} className="paper-title-link">
+            <span>{paper.title}</span>
+            <ArrowUpRight className="w-4 h-4 title-arrow inline-block" />
+          </Link>
         </h3>
 
         {paper.description && (
-          <p className="archive-desc">{paper.description}</p>
+          <p className="archive-paper-desc">{paper.description}</p>
         )}
 
-        <div className="archive-metadata-line">
-          <span>{paper.mbbs_year}</span>
-          <span>·</span>
-          <span>{paper.exam_attempt}</span>
-          <span>·</span>
-          <span>{paper.file_type === 'pdf' ? 'PDF Document' : 'Scanned Images'}</span>
-          <span>·</span>
+        <div className="archive-tech-meta font-mono">
+          <span>{paper.exam_attempt || 'Main Exam'}</span>
+          <span className="dot">•</span>
+          <span>{paper.college_name || 'GMC Archive'}</span>
+          <span className="dot">•</span>
+          <span>{paper.file_type === 'pdf' ? 'PDF Doc' : 'Scanned Document'}</span>
+          <span className="dot">•</span>
           <span>{formatFileSize(paper.file_size)}</span>
-          <span>·</span>
-          <span className="stats-inline">
-            <Eye className="w-3.5 h-3.5 inline mr-1" />
+          <span className="dot">•</span>
+          <span className="stat-pill">
+            <Eye className="w-3.5 h-3.5 inline mr-1 text-muted" />
             {paper.view_count} views
           </span>
-          <span>·</span>
-          <span className="stats-inline">
-            <Download className="w-3.5 h-3.5 inline mr-1" />
+          <span className="dot">•</span>
+          <span className="stat-pill">
+            <Download className="w-3.5 h-3.5 inline mr-1 text-muted" />
             {paper.download_count} downloads
           </span>
         </div>
       </div>
 
-      <div className="archive-actions-column">
-        <Link href={`/papers/${paper.id}`} className="btn btn-secondary btn-sm">
-          View Paper
+      <div className="archive-actions-group">
+        <Link href={`/papers/${paper.id}`} className="btn btn-secondary btn-sm card-btn-view">
+          <FileText className="w-3.5 h-3.5" />
+          <span>View</span>
         </Link>
         <a
           href={`/api/papers/${paper.id}/download`}
           download
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-sm card-btn-dl"
         >
           <Download className="w-3.5 h-3.5" />
-          Download
+          <span>Download</span>
         </a>
       </div>
 
       <style jsx>{`
-        .archive-paper-entry {
+        .archive-paper-card {
           background-color: #FFFFFF;
-          border: 1px solid var(--border-subtle);
+          border: var(--border-width-bold) solid var(--border-dark);
           border-radius: var(--radius-md);
-          padding: 1.5rem;
+          padding: 1.25rem 1.5rem;
           display: flex;
           align-items: center;
-          gap: 1.5rem;
-          transition: border-color 0.15s ease, box-shadow 0.15s ease;
-          box-shadow: var(--shadow-sm);
+          gap: 1.25rem;
+          box-shadow: var(--shadow-brutalist);
+          transition: transform 0.12s ease, box-shadow 0.12s ease;
+          position: relative;
         }
 
-        .archive-paper-entry:hover {
-          border-color: var(--border-medium);
-          box-shadow: var(--shadow-soft);
+        .archive-paper-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 5px 5px 0 var(--border-dark);
         }
 
-        .archive-number {
-          font-family: var(--font-mono);
-          font-size: 1.25rem;
+        .archive-index-badge {
+          font-size: 1.125rem;
           font-weight: 700;
-          color: var(--text-light);
-          min-width: 32px;
+          color: var(--text-muted);
+          min-width: 38px;
+          height: 38px;
+          border: 1.5px solid var(--border-subtle);
+          border-radius: var(--radius-sm);
+          background-color: var(--bg-main);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
         }
 
-        .archive-main-info {
+        .archive-main-content {
           flex: 1;
           display: flex;
           flex-direction: column;
+          gap: 0.35rem;
+          min-width: 0;
         }
 
-        .archive-eyebrow-row {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .archive-exam-type {
-          font-size: 0.8125rem;
-          font-weight: 700;
-          color: var(--text-secondary);
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-
-        .archive-year {
-          font-size: 0.8125rem;
-          color: var(--text-muted);
-          font-weight: 600;
-        }
-
-        .archive-title {
-          font-size: 1.25rem;
-          font-weight: 800;
-          line-height: 1.3;
-          color: var(--text-primary);
-          margin-bottom: 0.375rem;
-        }
-
-        .archive-title a:hover {
-          color: var(--primary-teal);
-        }
-
-        .archive-desc {
-          font-size: 0.875rem;
-          color: var(--text-secondary);
-          line-height: 1.45;
-          margin-bottom: 0.625rem;
-        }
-
-        .archive-metadata-line {
+        .archive-tags-strip {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          font-size: 0.8125rem;
-          color: var(--text-muted);
           flex-wrap: wrap;
         }
 
-        .stats-inline {
-          font-weight: 600;
+        .archive-academic-year {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: var(--text-muted);
         }
 
-        .archive-actions-column {
+        .archive-paper-title {
+          font-size: 1.25rem;
+          font-weight: 700;
+          line-height: 1.3;
+          color: var(--text-primary);
+          margin-top: 0.15rem;
+        }
+
+        .paper-title-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+
+        .paper-title-link:hover {
+          color: var(--primary-teal);
+          text-decoration: underline;
+        }
+
+        .archive-paper-desc {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          line-height: 1.45;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .archive-tech-meta {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          flex-wrap: wrap;
+          margin-top: 0.15rem;
+        }
+
+        .dot {
+          color: var(--border-medium);
+        }
+
+        .stat-pill {
+          font-weight: 700;
+          color: var(--text-secondary);
+        }
+
+        .archive-actions-group {
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
-          min-width: 130px;
+          min-width: 120px;
+          flex-shrink: 0;
+        }
+
+        .card-btn-view, .card-btn-dl {
+          width: 100%;
+          justify-content: center;
         }
 
         @media (max-width: 639px) {
-          .archive-paper-entry {
+          .archive-paper-card {
             flex-direction: column;
             align-items: flex-start;
-            padding: 1rem;
-            gap: 0.75rem;
-            border-radius: var(--radius-md);
+            padding: 1.125rem;
+            gap: 0.875rem;
           }
-          .archive-number {
+          .archive-index-badge {
             display: none;
           }
-          .archive-title {
-            font-size: 1rem;
+          .archive-paper-title {
+            font-size: 1.0625rem;
           }
-          .archive-eyebrow-row {
-            flex-wrap: wrap;
-            gap: 0.35rem 0.5rem;
-          }
-          .archive-metadata-line {
-            gap: 0.35rem;
-            font-size: 0.78125rem;
-          }
-          .archive-actions-column {
+          .archive-actions-group {
             flex-direction: row;
             width: 100%;
             gap: 0.5rem;
-            margin-top: 0.25rem;
           }
-          .archive-actions-column a {
+          .card-btn-view, .card-btn-dl {
             flex: 1;
-            justify-content: center;
             min-height: 48px;
-            font-weight: 600;
           }
         }
       `}</style>
     </div>
   );
 }
+

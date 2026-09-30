@@ -77,12 +77,12 @@ export default function MultiFileUpload({
         />
 
         <div className="upload-icon-circle">
-          <UploadCloud className="w-8 h-8 text-teal" />
+          <UploadCloud className="w-7 h-7 text-dark" />
         </div>
 
-        <h3 className="dropzone-title">Drop your PDF or scanned pages here</h3>
+        <h3 className="dropzone-title font-display">DROP YOUR PDF OR SCANNED PAGES HERE</h3>
         <p className="dropzone-sub">
-          Supports single <strong>PDF</strong> document or <strong>Multiple Image scans</strong> (JPG, PNG).
+          Supports single <strong>PDF</strong> document or <strong>Multiple Image scans</strong> (JPG, PNG, WEBP).
         </p>
 
         <button type="button" className="btn btn-secondary btn-sm mt-3">
@@ -91,7 +91,7 @@ export default function MultiFileUpload({
       </div>
 
       {error && (
-        <div className="error-banner mt-3">
+        <div className="error-banner mt-3 font-mono">
           <AlertCircle className="w-4 h-4 text-rose" />
           <span>{error}</span>
         </div>
@@ -101,7 +101,7 @@ export default function MultiFileUpload({
       {files.length > 0 && (
         <div className="files-preview-section mt-4">
           <div className="preview-heading-row mb-2">
-            <span className="eyebrow">ATTACHED FILES ({files.length})</span>
+            <span className="eyebrow font-mono">ATTACHED FILES ({files.length})</span>
           </div>
           <div className="files-list">
             {files.map((file, idx) => {
@@ -110,14 +110,14 @@ export default function MultiFileUpload({
                 <div key={`${file.name}-${idx}`} className="file-row-item">
                   <div className="file-type-icon">
                     {isPdf ? (
-                      <FileText className="w-4 h-4 text-teal" />
+                      <FileText className="w-4 h-4 text-dark" />
                     ) : (
-                      <ImageIcon className="w-4 h-4 text-emerald" />
+                      <ImageIcon className="w-4 h-4 text-dark" />
                     )}
                   </div>
                   <div className="file-info font-mono">
                     <span className="file-name">{file.name}</span>
-                    <span className="file-size">Page {idx + 1} · {formatSize(file.size)}</span>
+                    <span className="file-size">PAGE {idx + 1} · {formatSize(file.size)}</span>
                   </div>
                   <button
                     type="button"
@@ -143,23 +143,24 @@ export default function MultiFileUpload({
         }
 
         .dropzone-surface {
-          background-color: var(--bg-surface-subtle);
-          border: 1px dashed var(--border-medium);
+          background-color: #FFFFFF;
+          border: 2px dashed var(--border-dark);
           border-radius: var(--radius-md);
-          padding: 2.5rem 1.5rem;
+          padding: 2.25rem 1.5rem;
           text-align: center;
           cursor: pointer;
           transition: all 0.15s ease;
           display: flex;
           flex-direction: column;
           align-items: center;
+          box-shadow: 2px 2px 0 rgba(17, 24, 39, 0.08);
         }
 
         .dropzone-surface:hover,
         .dropzone-active {
-          background-color: #FFFFFF;
-          border-color: var(--primary-teal);
-          box-shadow: var(--shadow-soft);
+          background-color: var(--primary-yellow-light);
+          border-color: var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .hidden-file-input {
@@ -169,19 +170,21 @@ export default function MultiFileUpload({
         .upload-icon-circle {
           width: 52px;
           height: 52px;
-          background-color: #FFFFFF;
-          border-radius: 50%;
+          background-color: var(--primary-yellow);
+          border: 1.5px solid var(--border-dark);
+          border-radius: var(--radius-sm);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: var(--shadow-sm);
+          box-shadow: 2px 2px 0 var(--border-dark);
           margin-bottom: 0.875rem;
         }
 
         .dropzone-title {
           font-size: 1.125rem;
-          font-weight: 700;
+          font-weight: 800;
           color: var(--text-primary);
+          letter-spacing: 0.02em;
           margin-bottom: 0.375rem;
         }
 
@@ -197,9 +200,11 @@ export default function MultiFileUpload({
           gap: 0.5rem;
           background-color: var(--accent-rose-light);
           color: #9F1239;
+          border: 1.5px solid var(--accent-rose);
           padding: 0.625rem 0.875rem;
           border-radius: var(--radius-sm);
           font-size: 0.875rem;
+          font-weight: 600;
         }
 
         .files-list {
@@ -214,14 +219,16 @@ export default function MultiFileUpload({
           gap: 0.75rem;
           padding: 0.625rem 0.875rem;
           background-color: #FFFFFF;
-          border: 1px solid var(--border-subtle);
+          border: 1.5px solid var(--border-dark);
           border-radius: var(--radius-sm);
+          box-shadow: 1.5px 1.5px 0 var(--border-dark);
         }
 
         .file-type-icon {
-          width: 30px;
-          height: 30px;
-          background-color: var(--bg-surface-subtle);
+          width: 32px;
+          height: 32px;
+          background-color: var(--primary-yellow-light);
+          border: 1px solid #EAB308;
           border-radius: var(--radius-sm);
           display: flex;
           align-items: center;
@@ -237,7 +244,7 @@ export default function MultiFileUpload({
 
         .file-name {
           font-size: 0.875rem;
-          font-weight: 600;
+          font-weight: 700;
           color: var(--text-primary);
           white-space: nowrap;
           overflow: hidden;
@@ -251,14 +258,21 @@ export default function MultiFileUpload({
 
         .remove-btn {
           background: none;
-          border: none;
+          border: 1px solid var(--border-dark);
           cursor: pointer;
-          padding: 0.375rem;
+          padding: 0.35rem;
           border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .remove-btn:hover {
           background-color: var(--accent-rose-light);
+        }
+
+        .text-dark {
+          color: #111827;
         }
 
         @media (max-width: 639px) {
@@ -284,3 +298,4 @@ export default function MultiFileUpload({
     </div>
   );
 }
+

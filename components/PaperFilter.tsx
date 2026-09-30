@@ -40,34 +40,34 @@ export default function PaperFilter({
     filters.sortBy !== 'latest';
 
   return (
-    <div className="filter-bar-editorial mb-8">
+    <div className="filter-bar-editorial card mb-8">
       <div className="search-row mb-4">
         <div className="search-input-container">
-          <Search className="search-icon w-5 h-5" />
+          <Search className="search-icon w-5 h-5 text-dark" />
           <input
             type="text"
-            placeholder="Search Anatomy, Physiology, 2025..."
+            placeholder="Filter by title, subject, college, year..."
             value={filters.query}
             onChange={(e) => onChange('query', e.target.value)}
-            className="search-input-field"
+            className="search-input-field font-display"
           />
         </div>
 
         {hasActiveFilters && (
-          <button onClick={onReset} className="btn btn-secondary btn-sm">
+          <button onClick={onReset} className="btn btn-primary btn-sm btn-reset-filter">
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Filters</span>
+            <span>Reset All</span>
           </button>
         )}
       </div>
 
       <div className="filters-strip">
         <div className="filter-select-unit">
-          <span className="select-label">Subject</span>
+          <span className="select-label font-mono">SUBJECT</span>
           <select
             value={filters.subjectId}
             onChange={(e) => onChange('subjectId', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="">All Subjects</option>
             {subjects.map((sub) => (
@@ -79,11 +79,11 @@ export default function PaperFilter({
         </div>
 
         <div className="filter-select-unit">
-          <span className="select-label">Exam Type</span>
+          <span className="select-label font-mono">EXAM TYPE</span>
           <select
             value={filters.examTypeId}
             onChange={(e) => onChange('examTypeId', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="">All Exam Types</option>
             {examTypes.map((exam) => (
@@ -95,11 +95,11 @@ export default function PaperFilter({
         </div>
 
         <div className="filter-select-unit">
-          <span className="select-label">MBBS Stage</span>
+          <span className="select-label font-mono">MBBS STAGE</span>
           <select
             value={filters.mbbsYear}
             onChange={(e) => onChange('mbbsYear', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="">All MBBS Years</option>
             {mbbsYears.map((yr) => (
@@ -111,11 +111,11 @@ export default function PaperFilter({
         </div>
 
         <div className="filter-select-unit">
-          <span className="select-label">Attempt</span>
+          <span className="select-label font-mono">ATTEMPT</span>
           <select
             value={filters.examAttempt}
             onChange={(e) => onChange('examAttempt', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="">All Attempts</option>
             {examAttempts.map((att) => (
@@ -127,11 +127,11 @@ export default function PaperFilter({
         </div>
 
         <div className="filter-select-unit">
-          <span className="select-label">Year</span>
+          <span className="select-label font-mono">EXAM YEAR</span>
           <select
             value={filters.examYear}
             onChange={(e) => onChange('examYear', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="">All Years</option>
             {examYears.map((yr) => (
@@ -143,11 +143,11 @@ export default function PaperFilter({
         </div>
 
         <div className="filter-select-unit ml-auto">
-          <span className="select-label">Sort</span>
+          <span className="select-label font-mono">SORT BY</span>
           <select
             value={filters.sortBy}
             onChange={(e) => onChange('sortBy', e.target.value)}
-            className="select-field"
+            className="select-field font-mono"
           >
             <option value="latest">Latest Added</option>
             <option value="views">Most Viewed</option>
@@ -159,6 +159,10 @@ export default function PaperFilter({
       <style jsx>{`
         .filter-bar-editorial {
           width: 100%;
+          background-color: #FFFFFF;
+          border: var(--border-width-bold) solid var(--border-dark);
+          padding: 1.25rem;
+          box-shadow: var(--shadow-brutalist);
         }
 
         .search-row {
@@ -177,7 +181,7 @@ export default function PaperFilter({
           left: 1rem;
           top: 50%;
           transform: translateY(-50%);
-          color: var(--text-muted);
+          color: var(--text-primary);
         }
 
         .search-input-field {
@@ -186,15 +190,24 @@ export default function PaperFilter({
           padding-left: 2.75rem;
           padding-right: 1rem;
           font-size: 1rem;
-          border: 1px solid var(--border-medium);
-          border-radius: var(--radius-md);
+          font-weight: 700;
+          border: var(--border-width-bold) solid var(--border-dark);
+          border-radius: var(--radius-sm);
           background-color: #FFFFFF;
           color: var(--text-primary);
           outline: none;
+          box-shadow: 2px 2px 0 rgba(17, 24, 39, 0.12);
         }
 
         .search-input-field:focus {
-          border-color: var(--primary-teal);
+          border-color: var(--border-dark);
+          background-color: #FFFDF5;
+          box-shadow: 3px 3px 0 var(--border-dark);
+        }
+
+        .btn-reset-filter {
+          white-space: nowrap;
+          height: 48px;
         }
 
         .filters-strip {
@@ -202,8 +215,8 @@ export default function PaperFilter({
           align-items: center;
           gap: 1.25rem;
           flex-wrap: wrap;
-          padding-top: 0.5rem;
-          border-top: 1px solid var(--border-subtle);
+          padding-top: 1rem;
+          border-top: 1.5px solid var(--border-dark);
         }
 
         .filter-select-unit {
@@ -213,22 +226,27 @@ export default function PaperFilter({
         }
 
         .select-label {
-          font-size: 0.78125rem;
+          font-size: 0.75rem;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: var(--text-muted);
+          color: var(--text-secondary);
         }
 
         .select-field {
-          padding: 0.375rem 0.75rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          border: 1px solid var(--border-subtle);
+          padding: 0.4rem 0.75rem;
+          font-size: 0.8125rem;
+          font-weight: 700;
+          border: 1.5px solid var(--border-dark);
           border-radius: var(--radius-sm);
           background-color: #FFFFFF;
           color: var(--text-primary);
           outline: none;
+          box-shadow: 1.5px 1.5px 0 var(--border-dark);
+        }
+
+        .select-field:focus {
+          background-color: var(--primary-yellow-light);
         }
 
         .ml-auto {
@@ -244,10 +262,9 @@ export default function PaperFilter({
 
           .search-input-field {
             height: 48px;
-            border-radius: 10px;
           }
 
-          .search-row button {
+          .btn-reset-filter {
             width: 100%;
             min-height: 44px;
             justify-content: center;
@@ -256,21 +273,20 @@ export default function PaperFilter({
           .filters-strip {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.625rem;
+            gap: 0.75rem;
             padding-top: 0.75rem;
           }
 
           .filter-select-unit {
             flex-direction: column;
             align-items: flex-start;
-            gap: 0.2rem;
+            gap: 0.25rem;
             width: 100%;
           }
 
           .select-field {
             width: 100%;
-            min-height: 48px;
-            border-radius: var(--radius-md);
+            min-height: 44px;
             font-size: 0.8125rem;
           }
 
@@ -288,3 +304,4 @@ export default function PaperFilter({
     </div>
   );
 }
+
