@@ -12,7 +12,6 @@ export default function Header() {
     { label: 'Subjects', href: '/browse' },
     { label: 'Upload', href: '/upload' },
     { label: 'Coverage', href: '/coverage' },
-    { label: 'Admin', href: '/admin', isSubtle: true },
   ];
 
   return (
@@ -35,9 +34,7 @@ export default function Header() {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`nav-link ${isActive ? 'nav-link-active' : ''} ${
-                  item.isSubtle ? 'nav-link-subtle' : ''
-                }`}
+                className={`nav-link ${isActive ? 'nav-link-active' : ''}`}
               >
                 <span>{item.label}</span>
               </Link>
@@ -116,37 +113,49 @@ export default function Header() {
         .nav-menu {
           display: flex;
           align-items: center;
-          gap: 0.25rem;
+          gap: 2rem; /* approx 32px */
         }
 
         .nav-link {
           font-family: var(--font-display);
-          font-size: 0.875rem;
+          font-size: 0.9375rem;
           font-weight: 700;
           color: var(--text-secondary);
-          padding: 0.35rem 0.75rem;
-          border-radius: var(--radius-sm);
-          border: 1.5px solid transparent;
+          padding: 0.25rem 0;
           text-transform: uppercase;
           letter-spacing: 0.03em;
+          position: relative;
+          transition: color 0.15s ease;
         }
 
-        .nav-link:hover {
+        .nav-link:hover, .nav-link:focus-visible {
           color: var(--text-primary);
-          background-color: #FFFFFF;
-          border-color: var(--border-dark);
+          outline: none;
+        }
+
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: var(--primary-yellow);
+          transform: scaleX(0);
+          transform-origin: bottom left;
+          transition: transform 0.2s ease;
+        }
+
+        .nav-link:hover::after, .nav-link:focus-visible::after {
+          transform: scaleX(1);
         }
 
         .nav-link-active {
           color: var(--text-primary);
-          background-color: var(--primary-yellow);
-          border-color: var(--border-dark);
-          box-shadow: 2px 2px 0 var(--border-dark);
         }
 
-        .nav-link-subtle {
-          color: var(--text-muted);
-          font-weight: 600;
+        .nav-link-active::after {
+          transform: scaleX(1);
         }
 
         .header-cta {
