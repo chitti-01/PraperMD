@@ -89,6 +89,14 @@ html, body {
   line-height: 1.5;
 }
 
+@media (max-width: 639px) {
+  html, body {
+    background-image: 
+      linear-gradient(to right, rgba(17, 24, 39, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(17, 24, 39, 0.02) 1px, transparent 1px);
+  }
+}
+
 a {
   color: inherit;
   text-decoration: none;

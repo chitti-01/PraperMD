@@ -174,6 +174,9 @@ export default function Header() {
           .nav-menu {
             display: none;
           }
+          .header-cta {
+            display: none;
+          }
           .brand-group {
             gap: 0.5rem;
           }

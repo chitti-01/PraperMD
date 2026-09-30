@@ -110,11 +110,12 @@ export default function HomePage() {
         </div>
 
         <h1 className="h1-hero hero-title mb-3">
-          MEDICAL QUESTION PAPER ARCHIVE
+          MEDICAL QUESTION<br className="mobile-break" /> PAPER ARCHIVE
         </h1>
 
         <p className="hero-desc mx-auto mb-8">
-          Find previous university, semester, internal assessment, and practical question papers from your medical college.
+          <span className="desktop-only">Find previous university, semester, internal assessment, and practical question papers from your medical college.</span>
+          <span className="mobile-only">Find previous question papers from your medical college in one searchable archive.</span>
         </p>
 
         {/* DOMINANT Search Box */}
@@ -136,14 +137,14 @@ export default function HomePage() {
         </form>
 
         {/* 2 Supporting Actions */}
-        <div className="hero-actions flex-center gap-3">
-          <Link href="/browse" className="btn btn-secondary btn-md">
-            <span>Browse Papers</span>
+        <div className="hero-actions">
+          <Link href="/browse" className="btn btn-secondary btn-md hero-btn">
+            <span>BROWSE PAPERS</span>
             <ArrowRight className="w-4 h-4 ml-1" />
           </Link>
-          <Link href="/upload" className="btn btn-primary btn-md">
+          <Link href="/upload" className="btn btn-primary btn-md hero-btn">
             <Upload className="w-4 h-4 mr-1" />
-            <span>Upload Paper</span>
+            <span>UPLOAD PAPER</span>
           </Link>
         </div>
       </section>
@@ -151,13 +152,17 @@ export default function HomePage() {
       {/* 2. Restrained Repository Summary Bar */}
       <section className="summary-bar mb-12">
         <div className="summary-strip font-mono text-center">
-          <span>{loading ? '...' : totalPapers} INDEXED PAPERS</span>
-          <span className="dot">•</span>
-          <span>{loading ? '...' : subjects.length} MEDICAL SUBJECTS</span>
-          <span className="dot">•</span>
-          <span>4 EXAM CATEGORIES</span>
-          <span className="dot">•</span>
-          <span>FREE PUBLIC ARCHIVE</span>
+          <div className="summary-row">
+            <span>{loading ? '...' : totalPapers} PAPERS</span>
+            <span className="dot">•</span>
+            <span>{loading ? '...' : subjects.length} SUBJECTS</span>
+          </div>
+          <span className="dot desktop-dot">•</span>
+          <div className="summary-row">
+            <span>4 EXAM TYPES</span>
+            <span className="dot">•</span>
+            <span>FREE ARCHIVE</span>
+          </div>
         </div>
       </section>
 
@@ -288,10 +293,14 @@ export default function HomePage() {
         }
 
         .hero-title {
-          font-size: clamp(2rem, 4vw, 3rem);
+          font-size: clamp(2rem, 5vw, 3rem);
           line-height: 1.1;
           letter-spacing: -0.02em;
           color: var(--text-primary);
+        }
+
+        .mobile-break {
+          display: none;
         }
 
         .hero-desc {
@@ -299,6 +308,10 @@ export default function HomePage() {
           font-size: 1.05rem;
           color: var(--text-secondary);
           line-height: 1.5;
+        }
+
+        .mobile-only {
+          display: none;
         }
 
         .search-box-wrap {
@@ -339,14 +352,20 @@ export default function HomePage() {
         .search-submit-btn {
           position: absolute;
           right: 0.35rem;
-          height: 42px;
+          height: 44px;
           padding: 0 1.25rem;
         }
 
-        .flex-center {
+        .hero-actions {
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 0.75rem;
+        }
+
+        .hero-btn {
+          min-width: 160px;
+          height: 48px;
         }
 
         /* Summary Strip */
@@ -359,16 +378,21 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          flex-wrap: wrap;
           gap: 0.75rem;
           background-color: #FFFFFF;
           border: 1.5px solid var(--border-dark);
           border-radius: var(--radius-sm);
-          padding: 0.5rem 1.25rem;
+          padding: 0.75rem 1.25rem;
           font-size: 0.75rem;
           font-weight: 700;
           color: var(--text-secondary);
           box-shadow: 2px 2px 0 var(--border-dark);
+        }
+
+        .summary-row {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
         }
 
         .dot {
@@ -493,6 +517,67 @@ export default function HomePage() {
           }
         }
 
+        @media (max-width: 639px) {
+          .mobile-break {
+            display: block;
+          }
+          .desktop-only {
+            display: none;
+          }
+          .mobile-only {
+            display: inline;
+          }
+          .hero-title {
+            font-size: 2rem;
+          }
+          .hero-desc {
+            font-size: 0.95rem;
+            padding: 0 0.5rem;
+          }
+          .hero-actions {
+            flex-direction: column;
+            width: 100%;
+          }
+          .hero-btn {
+            width: 100%;
+          }
+          .search-input-box {
+            flex-direction: column;
+            gap: 0.5rem;
+            border: none;
+            box-shadow: none;
+            background: transparent;
+            padding: 0;
+          }
+          .search-input {
+            background-color: #FFFFFF;
+            border: 1.5px solid var(--border-dark);
+            border-radius: var(--radius-md);
+            box-shadow: 3px 3px 0 var(--border-dark);
+            padding-right: 1rem;
+            height: 52px;
+            font-size: 0.95rem;
+          }
+          .search-icon {
+            z-index: 10;
+            top: 16px;
+          }
+          .search-submit-btn {
+            position: relative;
+            right: 0;
+            width: 100%;
+            height: 52px;
+          }
+          .summary-strip {
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+          }
+          .desktop-dot {
+            display: none;
+          }
+        }
+
         @media (max-width: 480px) {
           .compact-subjects-grid {
             grid-template-columns: 1fr;
@@ -500,13 +585,9 @@ export default function HomePage() {
           .flow-steps-grid {
             grid-template-columns: 1fr;
           }
-          .search-input {
-            padding-right: 100px;
-            font-size: 0.9rem;
-          }
-          .search-submit-btn {
-            padding: 0 0.875rem;
-            font-size: 0.8125rem;
+          .compact-subject-card {
+            padding: 1rem;
+            min-height: 56px;
           }
         }
       `}</style>
