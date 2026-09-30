@@ -20,11 +20,11 @@ export default function Header() {
       <div className="container header-container">
         <Link href="/" className="brand-group">
           <div className="brand-symbol">
-            <BookOpen className="w-5 h-5 text-teal" />
+            <BookOpen className="w-5 h-5 text-dark" />
           </div>
           <div className="brand-meta">
-            <span className="brand-name">PaperMD</span>
-            <span className="brand-sub">Academic Repository</span>
+            <span className="brand-name">PAPERMD</span>
+            <span className="brand-sub font-mono">MEDICAL ARCHIVE</span>
           </div>
         </Link>
 
@@ -60,9 +60,9 @@ export default function Header() {
           position: sticky;
           top: 0;
           z-index: 100;
-          background-color: rgba(246, 247, 244, 0.92);
+          background-color: rgba(247, 246, 240, 0.96);
           backdrop-filter: blur(8px);
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 2px solid var(--border-dark);
           height: 72px;
           display: flex;
           align-items: center;
@@ -81,15 +81,15 @@ export default function Header() {
         }
 
         .brand-symbol {
-          width: 38px;
-          height: 38px;
-          background-color: #FFFFFF;
-          border: 1px solid var(--border-subtle);
+          width: 40px;
+          height: 40px;
+          background-color: var(--primary-yellow);
+          border: 2px solid var(--border-dark);
           border-radius: var(--radius-sm);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: var(--shadow-sm);
+          box-shadow: 2px 2px 0 var(--border-dark);
         }
 
         .brand-meta {
@@ -98,64 +98,62 @@ export default function Header() {
         }
 
         .brand-name {
-          font-family: var(--font-mono);
-          font-size: 1.125rem;
+          font-family: var(--font-display);
+          font-size: 1.25rem;
           font-weight: 800;
           color: var(--text-primary);
-          letter-spacing: 0.02em;
+          letter-spacing: 0.04em;
           line-height: 1;
         }
 
         .brand-sub {
-          font-size: 0.75rem;
+          font-family: var(--font-mono);
+          font-size: 0.65rem;
           color: var(--text-muted);
-          font-weight: 500;
-          margin-top: 0.15rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          margin-top: 0.2rem;
         }
 
         .nav-menu {
           display: flex;
           align-items: center;
-          gap: 1.75rem;
+          gap: 0.5rem;
         }
 
         .nav-link {
+          font-family: var(--font-display);
           font-size: 0.9375rem;
-          font-weight: 600;
+          font-weight: 700;
           color: var(--text-secondary);
-          position: relative;
-          padding-top: 0.25rem;
-          padding-bottom: 0.25rem;
+          padding: 0.35rem 0.85rem;
+          border-radius: var(--radius-sm);
+          border: 1.5px solid transparent;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
         }
 
         .nav-link:hover {
-          color: var(--primary-teal);
+          color: var(--text-primary);
+          background-color: #FFFFFF;
+          border-color: var(--border-dark);
         }
 
         .nav-link-active {
           color: var(--text-primary);
-          font-weight: 700;
-        }
-
-        .nav-link-active::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          right: 0;
-          height: 2px;
-          background-color: var(--primary-teal);
+          background-color: var(--primary-yellow);
+          border-color: var(--border-dark);
+          box-shadow: 2px 2px 0 var(--border-dark);
         }
 
         .header-cta {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
+          gap: 0.625rem;
         }
 
-        .btn-header-scan {
-          background-color: var(--accent-highlight);
-          border-color: var(--accent-highlight);
+        .text-dark {
+          color: var(--text-primary);
         }
 
         @media (max-width: 639px) {
@@ -172,31 +170,29 @@ export default function Header() {
             gap: 0.5rem;
           }
           .brand-symbol {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+            width: 34px;
+            height: 34px;
+            border-radius: 4px;
+            box-shadow: 1.5px 1.5px 0 var(--border-dark);
           }
           .brand-name {
-            font-size: 1rem;
+            font-size: 1.05rem;
             line-height: 1;
           }
           .brand-sub {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             white-space: nowrap;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
           }
           .btn-header-scan {
             padding: 0.35rem 0.75rem;
             font-size: 0.8125rem;
             min-height: 40px;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-sm);
           }
-        }
-
-        :global(.text-teal) {
-          color: var(--primary-teal);
         }
       `}</style>
     </header>
   );
 }
+

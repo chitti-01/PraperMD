@@ -35,7 +35,7 @@ export default function MobileBottomNav() {
               <div className={`icon-container ${isActive ? 'icon-container-active' : ''} ${item.isScan ? 'icon-scan-bg' : ''}`}>
                 <Icon className="w-5 h-5 nav-icon" />
               </div>
-              <span className="nav-label">{item.label}</span>
+              <span className="nav-label font-mono">{item.label}</span>
             </Link>
           );
         })}
@@ -49,11 +49,10 @@ export default function MobileBottomNav() {
           left: 0;
           right: 0;
           z-index: 900;
-          background-color: rgba(255, 255, 255, 0.98);
-          backdrop-filter: blur(12px);
-          border-top: 1px solid var(--border-subtle);
+          background-color: #FFFFFF;
+          border-top: 2px solid var(--border-dark);
           padding-bottom: env(safe-area-inset-bottom, 0px);
-          box-shadow: 0 -2px 10px rgba(17, 24, 39, 0.04);
+          box-shadow: 0 -2px 0 var(--border-dark);
         }
 
         @media (max-width: 639px) {
@@ -86,47 +85,56 @@ export default function MobileBottomNav() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 26px;
-          border-radius: var(--radius-pill);
-          transition: background-color 0.15s ease;
+          width: 34px;
+          height: 28px;
+          border-radius: var(--radius-sm);
+          border: 1.5px solid transparent;
+          transition: background-color 0.15s ease, border-color 0.15s ease;
         }
 
         .nav-cell-active {
-          color: var(--primary-teal);
+          color: var(--text-primary);
         }
 
         .nav-cell-active .icon-container-active {
-          background-color: var(--primary-teal-light);
-          color: var(--primary-teal);
+          background-color: var(--primary-yellow);
+          border-color: var(--border-dark);
+          color: #111827;
         }
 
         .nav-cell-scan {
-          color: var(--accent-highlight);
+          color: var(--text-primary);
         }
 
         .nav-cell-scan .icon-scan-bg {
-          background-color: var(--accent-highlight-bg);
-          color: var(--accent-highlight);
+          background-color: var(--primary-yellow-light);
+          border-color: #EAB308;
+          color: #111827;
         }
 
         .nav-cell-scan.nav-cell-active .icon-scan-bg {
-          background-color: var(--accent-highlight);
-          color: #FFFFFF;
+          background-color: var(--primary-yellow);
+          border-color: var(--border-dark);
+          color: #111827;
+          box-shadow: 1.5px 1.5px 0 #111827;
         }
 
         .nav-label {
-          font-size: 0.6875rem;
-          font-weight: 600;
-          letter-spacing: -0.01em;
+          font-family: var(--font-mono);
+          font-size: 0.65rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
           line-height: 1;
         }
 
         .nav-cell-active .nav-label {
           font-weight: 700;
+          color: var(--text-primary);
         }
       `}</style>
     </nav>
   );
 }
+
 
