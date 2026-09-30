@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { QuestionPaper } from '@/lib/types';
 import PaperViewer from '@/components/PaperViewer';
 import ReportModal from '@/components/ReportModal';
-import { Download, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Download, AlertTriangle, ArrowLeft, Eye } from 'lucide-react';
 
 export default function PaperDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -36,8 +36,8 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="container p-12 text-center">
-        <p className="subtext">Loading paper entry...</p>
+      <div className="container p-12 text-center font-mono">
+        <p className="subtext">LOADING PAPER ENTRY FROM REPOSITORY...</p>
       </div>
     );
   }
@@ -45,9 +45,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   if (!paper) {
     return (
       <div className="container p-12 text-center">
-        <h2 className="h2-title mb-4">Paper Entry Not Found</h2>
+        <h2 className="h2-title mb-4 font-display">Paper Entry Not Found</h2>
         <p className="subtext mb-6">The requested paper may have been removed or does not exist.</p>
-        <Link href="/browse" className="btn btn-primary">
+        <Link href="/browse" className="btn btn-primary btn-lg">
           Return to Archive
         </Link>
       </div>
@@ -55,35 +55,40 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="container">
+    <div className="container max-w-5xl">
       {/* Back button */}
       <div className="mb-4">
-        <Link href="/browse" className="back-link">
+        <Link href="/browse" className="back-link font-mono">
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Archive</span>
+          <span>BACK TO ARCHIVE</span>
         </Link>
       </div>
 
       {/* Main Detail Header Section */}
       <div className="paper-entry-header card mb-8">
-        <div className="eyebrow-line">
-          <span>{paper.subject_name?.toUpperCase() || 'SUBJECT'}</span>
-          <span>·</span>
-          <span>{paper.exam_type_name?.toUpperCase() || 'EXAM'}</span>
-          <span>·</span>
-          <span>{paper.exam_year}</span>
+        <div className="eyebrow-line font-mono">
+          <span className="badge badge-yellow">{paper.subject_name?.toUpperCase() || 'SUBJECT'}</span>
+          <span className="badge badge-teal">{paper.exam_type_name?.toUpperCase() || 'EXAM'}</span>
+          <span className="badge badge-emerald">YEAR: {paper.exam_year}</span>
+          {paper.academic_year && <span className="badge badge-slate">{paper.academic_year}</span>}
         </div>
 
-        <h1 className="h1-hero entry-title mb-3">{paper.title}</h1>
+        <h1 className="h1-hero entry-title mb-3 font-display">{paper.title}</h1>
 
-        <div className="entry-meta-strip mb-4">
+        <div className="entry-meta-strip mb-4 font-mono">
           <span className="meta-badge">{paper.mbbs_year}</span>
           {paper.exam_attempt && <span className="meta-badge">{paper.exam_attempt}</span>}
           <span className="meta-text">{paper.college_name || 'Government Medical College'}</span>
-          <span className="meta-text">·</span>
-          <span className="meta-text">{paper.view_count} views</span>
-          <span className="meta-text">·</span>
-          <span className="meta-text">{paper.download_count} downloads</span>
+          <span className="meta-dot">•</span>
+          <span className="meta-text">
+            <Eye className="w-3.5 h-3.5 inline mr-1 text-muted" />
+            {paper.view_count} views
+          </span>
+          <span className="meta-dot">•</span>
+          <span className="meta-text">
+            <Download className="w-3.5 h-3.5 inline mr-1 text-muted" />
+            {paper.download_count} downloads
+          </span>
         </div>
 
         {paper.description && (
@@ -97,12 +102,12 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
             className="btn btn-primary btn-lg"
           >
             <Download className="w-5 h-5" />
-            Download Paper
+            Download Question Paper
           </a>
 
           <button
             onClick={() => setReportModalOpen(true)}
-            className="btn btn-secondary text-amber-btn"
+            className="btn btn-secondary btn-lg text-amber-btn"
           >
             <AlertTriangle className="w-4 h-4 text-amber" />
             Report Issue
@@ -112,7 +117,9 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
 
       {/* Document Viewer */}
       <div className="mb-10">
-        <div className="eyebrow mb-2">DOCUMENT PREVIEW</div>
+        <div className="eyebrow font-mono mb-3">
+          <span>DOCUMENT PREVIEW • {paper.file_type.toUpperCase()}</span>
+        </div>
         <PaperViewer paper={paper} />
       </div>
 
@@ -125,38 +132,48 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
       />
 
       <style jsx>{`
+        .max-w-5xl {
+          max-width: 1040px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
         .back-link {
           display: inline-flex;
           align-items: center;
           gap: 0.375rem;
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: var(--text-muted);
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: var(--text-primary);
+          padding: 0.35rem 0.65rem;
+          border: 1.5px solid var(--border-dark);
+          border-radius: var(--radius-sm);
+          background-color: #FFFFFF;
+          box-shadow: 1.5px 1.5px 0 var(--border-dark);
         }
 
         .back-link:hover {
-          color: var(--primary-teal);
+          background-color: var(--primary-yellow);
         }
 
         .paper-entry-header {
-          padding: 2.25rem;
+          padding: 2rem 2.25rem;
           background-color: #FFFFFF;
+          border: var(--border-width-bold) solid var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .eyebrow-line {
-          font-family: var(--font-mono);
-          font-size: 0.8125rem;
-          font-weight: 700;
-          color: var(--primary-teal);
-          letter-spacing: 0.08em;
-          margin-bottom: 0.625rem;
+          margin-bottom: 0.875rem;
           display: flex;
           align-items: center;
           gap: 0.5rem;
+          flex-wrap: wrap;
         }
 
         .entry-title {
-          font-size: 2.25rem;
+          font-size: clamp(1.75rem, 4vw, 2.5rem);
+          line-height: 1.15;
         }
 
         .entry-meta-strip {
@@ -164,20 +181,27 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           align-items: center;
           gap: 0.625rem;
           flex-wrap: wrap;
+          font-size: 0.8125rem;
         }
 
         .meta-badge {
           background-color: var(--bg-surface-subtle);
-          color: var(--text-secondary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-dark);
           padding: 0.2rem 0.625rem;
           border-radius: var(--radius-sm);
-          font-size: 0.8125rem;
+          font-size: 0.75rem;
           font-weight: 700;
         }
 
         .meta-text {
-          font-size: 0.875rem;
-          color: var(--text-muted);
+          font-size: 0.8125rem;
+          color: var(--text-secondary);
+          font-weight: 700;
+        }
+
+        .meta-dot {
+          color: var(--border-medium);
         }
 
         .entry-description {
@@ -197,13 +221,8 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
           .paper-entry-header {
             padding: 1.25rem;
           }
-          .entry-title {
-            font-size: clamp(1.35rem, 5vw, 1.75rem);
-          }
           .eyebrow-line {
-            flex-wrap: wrap;
             gap: 0.35rem;
-            font-size: 0.75rem;
           }
           .entry-actions-row {
             flex-direction: column;
@@ -216,11 +235,8 @@ export default function PaperDetailPage({ params }: { params: Promise<{ id: stri
             min-height: 48px;
           }
         }
-
-        :global(.text-amber-btn) {
-          border-color: #FDE68A !important;
-        }
       `}</style>
     </div>
   );
 }
+

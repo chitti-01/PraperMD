@@ -89,16 +89,16 @@ export default function AdminPage() {
   if (!isAuthenticated) {
     return (
       <div className="container max-w-md py-16">
-        <div className="card text-center p-8">
+        <div className="card text-center p-8 border-dark">
           <div className="icon-shield mx-auto mb-4">
-            <Lock className="w-6 h-6 text-teal" />
+            <Lock className="w-6 h-6 text-dark" />
           </div>
-          <h1 className="h2-title text-2xl mb-2">Admin Quality Portal</h1>
-          <p className="subtext mb-6">
+          <h1 className="h2-title text-2xl mb-2 font-display">ADMIN QUALITY PORTAL</h1>
+          <p className="subtext mb-6 font-mono text-sm">
             Enter the admin authorization passkey to access repository controls.
           </p>
 
-          {authError && <div className="error-box mb-4">{authError}</div>}
+          {authError && <div className="error-box mb-4 font-mono">{authError}</div>}
 
           <form onSubmit={handleLogin}>
             <div className="form-group mb-4">
@@ -107,11 +107,11 @@ export default function AdminPage() {
                 placeholder="Enter Admin Passkey..."
                 value={passkey}
                 onChange={(e) => setPasskey(e.target.value)}
-                className="input-field text-center"
+                className="input-field text-center font-mono"
                 required
               />
             </div>
-            <button type="submit" className="btn btn-primary w-full">
+            <button type="submit" className="btn btn-primary w-full btn-lg">
               Authenticate Admin
             </button>
           </form>
@@ -124,13 +124,15 @@ export default function AdminPage() {
             margin-right: auto;
           }
           .icon-shield {
-            width: 52px;
-            height: 52px;
-            background-color: var(--bg-surface-subtle);
-            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            background-color: var(--primary-yellow);
+            border: 2px solid var(--border-dark);
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 2px 2px 0 var(--border-dark);
           }
           .mx-auto {
             margin-left: auto;
@@ -142,9 +144,14 @@ export default function AdminPage() {
           .error-box {
             background-color: var(--accent-rose-light);
             color: #9F1239;
+            border: 1.5px solid var(--accent-rose);
             padding: 0.625rem;
             border-radius: var(--radius-sm);
             font-size: 0.875rem;
+            font-weight: 600;
+          }
+          .text-dark {
+            color: #111827;
           }
         `}</style>
       </div>
@@ -158,55 +165,55 @@ export default function AdminPage() {
   return (
     <div className="container">
       <div className="admin-header mb-8">
-        <div className="eyebrow">
-          <Shield className="w-3.5 h-3.5" />
-          <span>PaperMD Admin</span>
+        <div className="eyebrow font-mono">
+          <Shield className="w-3.5 h-3.5 inline mr-1 text-dark" />
+          <span>PAPERMD CONTROL CENTER</span>
         </div>
-        <h1 className="h1-hero">Repository Health & Quality</h1>
-        <p className="subtext">
-          Inspect uploaded papers, edit metadata, handle duplicate reports, and monitor repository statistics.
+        <h1 className="h1-hero">REPOSITORY HEALTH & QUALITY</h1>
+        <p className="subtext font-mono mt-1">
+          Inspect uploaded papers, edit metadata, handle duplicate reports, and monitor repository health.
         </p>
       </div>
 
       {/* Repository Health Stats Strip */}
-      <section className="editorial-stats-strip mb-8">
+      <section className="editorial-stats-strip mb-8 font-mono">
         <div className="stat-unit">
           <span className="stat-number">{activePapers.length}</span>
-          <span className="stat-label">Active Papers</span>
+          <span className="stat-label">ACTIVE PAPERS</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-unit">
-          <span className="stat-number">{pendingReports.length}</span>
-          <span className="stat-label">Pending Reports</span>
+          <span className="stat-number text-amber-val">{pendingReports.length}</span>
+          <span className="stat-label">PENDING REPORTS</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-unit">
           <span className="stat-number">{totalDownloads}</span>
-          <span className="stat-label">Total Downloads</span>
+          <span className="stat-label">TOTAL DOWNLOADS</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-unit">
           <span className="stat-number">{subjects.length}</span>
-          <span className="stat-label">Subjects</span>
+          <span className="stat-label">SUBJECTS INDEXED</span>
         </div>
       </section>
 
       {/* Tabs */}
-      {loading && <div className="subtext text-xs mb-4">Refreshing data...</div>}
-      <div className="tabs-header mb-6">
+      {loading && <div className="subtext text-xs mb-4 font-mono">Refreshing data from database...</div>}
+      <div className="tabs-header mb-6 font-mono">
         <button
           onClick={() => setActiveTab('papers')}
           className={`tab-btn ${activeTab === 'papers' ? 'tab-active' : ''}`}
         >
           <FileText className="w-4 h-4" />
-          <span>Repository Papers ({papers.length})</span>
+          <span>REPOSITORY PAPERS ({papers.length})</span>
         </button>
         <button
           onClick={() => setActiveTab('reports')}
           className={`tab-btn ${activeTab === 'reports' ? 'tab-active' : ''}`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>Student Issue Reports ({reports.length})</span>
+          <span>ISSUE REPORTS ({reports.length})</span>
         </button>
       </div>
 
@@ -219,7 +226,7 @@ export default function AdminPage() {
                 <tr>
                   <th>Paper Title</th>
                   <th>Subject</th>
-                  <th>Exam Type & Year</th>
+                  <th>Exam & Year</th>
                   <th>MBBS Stage</th>
                   <th>Downloads</th>
                   <th>SHA-256 Hash</th>
@@ -230,18 +237,18 @@ export default function AdminPage() {
                 {papers.map((p) => (
                   <tr key={p.id} className={p.status === 'removed' ? 'row-removed' : ''}>
                     <td>
-                      <span className="font-bold block">{p.title}</span>
+                      <span className="font-bold block font-display">{p.title}</span>
                       <span className="text-xs text-muted font-mono">{p.original_file_name}</span>
                     </td>
                     <td>
-                      <span className="badge badge-teal">{p.subject_name}</span>
+                      <span className="badge badge-yellow">{p.subject_name}</span>
                     </td>
                     <td>
-                      <span>{p.exam_type_name}</span>
-                      <span className="text-xs text-muted block">{p.exam_year}</span>
+                      <span className="font-mono text-xs">{p.exam_type_name}</span>
+                      <span className="text-xs text-muted block font-mono">YEAR: {p.exam_year}</span>
                     </td>
-                    <td>{p.mbbs_year}</td>
-                    <td className="font-mono">{p.download_count}</td>
+                    <td className="font-mono text-xs">{p.mbbs_year}</td>
+                    <td className="font-mono text-xs font-bold">{p.download_count}</td>
                     <td>
                       <code className="text-xs font-mono text-muted" title={p.file_hash}>
                         {p.file_hash.substring(0, 10)}...
@@ -268,7 +275,7 @@ export default function AdminPage() {
       {activeTab === 'reports' && (
         <div className="card card-table">
           {reports.length === 0 ? (
-            <div className="p-8 text-center text-muted">
+            <div className="p-8 text-center text-muted font-mono">
               No student reports submitted yet.
             </div>
           ) : (
@@ -288,8 +295,8 @@ export default function AdminPage() {
                   {reports.map((rep) => (
                     <tr key={rep.id}>
                       <td>
-                        <span className="font-bold">{rep.paper_title}</span>
-                        <span className="text-xs text-muted block">{rep.subject_name}</span>
+                        <span className="font-bold font-display">{rep.paper_title}</span>
+                        <span className="text-xs text-muted block font-mono">{rep.subject_name}</span>
                       </td>
                       <td>
                         <span className="badge badge-amber">{rep.reason}</span>
@@ -355,7 +362,7 @@ export default function AdminPage() {
 
       <style jsx>{`
         .admin-header {
-          margin-top: 1rem;
+          margin-top: 0.75rem;
         }
 
         .editorial-stats-strip {
@@ -363,10 +370,10 @@ export default function AdminPage() {
           align-items: center;
           justify-content: space-between;
           background-color: #FFFFFF;
-          border: 1px solid var(--border-subtle);
+          border: var(--border-width-bold) solid var(--border-dark);
           border-radius: var(--radius-md);
           padding: 1.25rem 2rem;
-          box-shadow: var(--shadow-sm);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .stat-unit {
@@ -375,31 +382,35 @@ export default function AdminPage() {
         }
 
         .stat-number {
-          font-family: var(--font-mono);
-          font-size: 1.75rem;
-          font-weight: 700;
+          font-family: var(--font-display);
+          font-size: 2rem;
+          font-weight: 800;
           color: var(--text-primary);
           line-height: 1.1;
         }
 
+        .text-amber-val {
+          color: var(--accent-amber);
+        }
+
         .stat-label {
-          font-size: 0.8125rem;
+          font-size: 0.75rem;
           color: var(--text-muted);
-          font-weight: 600;
+          font-weight: 700;
           margin-top: 0.25rem;
         }
 
         .stat-divider {
-          width: 1px;
-          height: 32px;
-          background-color: var(--border-subtle);
+          width: 1.5px;
+          height: 36px;
+          background-color: var(--border-dark);
         }
 
         .tabs-header {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 2px solid var(--border-dark);
           padding-bottom: 0.5rem;
         }
 
@@ -408,30 +419,33 @@ export default function AdminPage() {
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          font-size: 0.875rem;
-          font-weight: 600;
+          font-size: 0.8125rem;
+          font-weight: 700;
           color: var(--text-muted);
           background: none;
-          border: none;
+          border: 1.5px solid transparent;
           border-radius: var(--radius-sm);
           cursor: pointer;
-          transition: all 0.15s;
+          transition: all 0.12s;
         }
 
         .tab-btn:hover {
-          color: var(--primary-teal);
+          color: var(--text-primary);
         }
 
         .tab-active {
           color: var(--text-primary);
-          background-color: #FFFFFF;
-          box-shadow: var(--shadow-sm);
-          font-weight: 700;
+          background-color: var(--primary-yellow);
+          border-color: var(--border-dark);
+          box-shadow: 2px 2px 0 var(--border-dark);
         }
 
         .card-table {
           padding: 0;
           overflow: hidden;
+          background-color: #FFFFFF;
+          border: var(--border-width-bold) solid var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .table-responsive {
@@ -448,7 +462,7 @@ export default function AdminPage() {
         .admin-table td {
           padding: 0.875rem 1rem;
           text-align: left;
-          border-bottom: 1px solid var(--border-subtle);
+          border-bottom: 1.5px solid var(--border-dark);
         }
 
         .admin-table th {
@@ -456,8 +470,9 @@ export default function AdminPage() {
           font-family: var(--font-mono);
           font-size: 0.78125rem;
           text-transform: uppercase;
-          color: var(--text-muted);
+          color: var(--text-primary);
           letter-spacing: 0.05em;
+          border-bottom: 2px solid var(--border-dark);
         }
 
         .row-removed {
@@ -473,6 +488,10 @@ export default function AdminPage() {
         }
         .max-w-xs {
           max-width: 280px;
+        }
+
+        .text-dark {
+          color: #111827;
         }
 
         @media (max-width: 639px) {
@@ -497,3 +516,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

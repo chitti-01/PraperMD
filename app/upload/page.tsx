@@ -73,7 +73,7 @@ export default function UploadPage() {
     const MAX_MB = 50;
     const totalBytes = files.reduce((acc, f) => acc + f.size, 0);
     if (totalBytes > MAX_MB * 1024 * 1024) {
-      setError(`Total upload size (${(totalBytes / (1024 * 1024)).toFixed(1)}MB) exceeds the maximum ${MAX_MB}MB limit. Please compress your PDF or select fewer pages.`);
+      setError(`Total upload size (${(totalBytes / (1024 * 1024)).toFixed(1)}MB) exceeds maximum ${MAX_MB}MB limit. Please compress your PDF or select fewer pages.`);
       return;
     }
 
@@ -196,21 +196,21 @@ export default function UploadPage() {
       <div className="container max-w-2xl py-12">
         <div className="card text-center p-8 bg-success-card">
           <CheckCircle2 className="w-16 h-16 text-emerald mx-auto mb-4" />
-          <h1 className="h1-hero text-2xl mb-2">Question Paper Published!</h1>
+          <h1 className="h1-hero text-2xl mb-2 font-display">QUESTION PAPER PUBLISHED!</h1>
           <p className="subtext mb-6">
-            Your paper <strong>&quot;{publishedPaper.title}&quot;</strong> is now live in the GMC archive.
+            Your paper <strong>&quot;{publishedPaper.title}&quot;</strong> is now live in the PaperMD archive.
           </p>
 
-          <div className="published-summary-box mb-6 text-left">
-            <p><strong>Subject:</strong> {publishedPaper.subject_name}</p>
-            <p><strong>Exam:</strong> {publishedPaper.exam_type_name} ({publishedPaper.exam_year})</p>
-            <p><strong>MBBS Stage:</strong> {publishedPaper.mbbs_year}</p>
+          <div className="published-summary-box mb-6 text-left font-mono">
+            <p><strong>SUBJECT:</strong> {publishedPaper.subject_name}</p>
+            <p><strong>EXAM:</strong> {publishedPaper.exam_type_name} ({publishedPaper.exam_year})</p>
+            <p><strong>MBBS STAGE:</strong> {publishedPaper.mbbs_year}</p>
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             <Link href={`/papers/${publishedPaper.id}`} className="btn btn-primary btn-lg">
               <FileText className="w-5 h-5" />
-              View Published Paper
+              <span>View Published Paper</span>
             </Link>
             <button
               onClick={() => {
@@ -221,10 +221,18 @@ export default function UploadPage() {
               }}
               className="btn btn-secondary btn-lg"
             >
-              Upload Another Paper
+              <span>Upload Another Paper</span>
             </button>
           </div>
         </div>
+
+        <style jsx>{`
+          .max-w-2xl { max-width: 680px; margin-left: auto; margin-right: auto; }
+          .bg-success-card { background-color: var(--accent-emerald-light); border-color: var(--accent-emerald); }
+          .published-summary-box { background-color: #FFFFFF; padding: 1rem; border: 1.5px solid var(--border-dark); border-radius: var(--radius-sm); }
+          .text-emerald { color: var(--accent-emerald); }
+          .mx-auto { margin-left: auto; margin-right: auto; }
+        `}</style>
       </div>
     );
   }
@@ -232,10 +240,13 @@ export default function UploadPage() {
   return (
     <div className="container max-w-3xl">
       <div className="upload-header mb-6">
-        <div className="eyebrow">CONTRIBUTE PAPER</div>
-        <h1 className="h1-hero">Add a Question Paper</h1>
-        <p className="subtext">
-          How would you like to contribute your question paper to the PaperMD archive?
+        <div className="eyebrow font-mono">
+          <Upload className="w-3.5 h-3.5 inline mr-1 text-dark" />
+          <span>COMMUNITY CONTRIBUTION ENGINE</span>
+        </div>
+        <h1 className="h1-hero">ADD A QUESTION PAPER</h1>
+        <p className="subtext font-mono mt-1">
+          Select your contribution method to index question papers into the archive.
         </p>
       </div>
 
@@ -243,18 +254,18 @@ export default function UploadPage() {
       <div className="contribution-method-grid mb-8">
         <Link href="/scan" className="method-card primary-method-card">
           <div className="method-icon-bubble primary-bubble">
-            <Camera className="w-6 h-6 text-white" />
+            <Camera className="w-6 h-6 text-dark" />
           </div>
           <div className="method-content">
             <div className="flex-between-title">
-              <h3 className="method-title text-primary-blue">Scan Paper</h3>
-              <span className="badge badge-accent">RECOMMENDED FOR MOBILE</span>
+              <h3 className="method-title font-display">SCAN WITH CAMERA</h3>
+              <span className="badge badge-yellow font-mono">MOBILE RECOMMENDED</span>
             </div>
             <p className="method-desc">
               Use your phone camera to scan physical paper pages step-by-step.
             </p>
           </div>
-          <ArrowRight className="w-5 h-5 text-accent-blue method-arrow" />
+          <ArrowRight className="w-5 h-5 text-dark method-arrow" />
         </Link>
 
         <div
@@ -262,12 +273,12 @@ export default function UploadPage() {
           className={`method-card ${method === 'file' ? 'method-card-active' : ''}`}
         >
           <div className="method-icon-bubble secondary-bubble">
-            <Upload className="w-5 h-5 text-teal" />
+            <Upload className="w-5 h-5 text-dark" />
           </div>
           <div className="method-content">
-            <h3 className="method-title">Upload Existing File</h3>
+            <h3 className="method-title font-display">UPLOAD FILE</h3>
             <p className="method-desc">
-              Select existing PDF documents or photo files already saved on your device.
+              Select existing PDF documents or photo files saved on your device.
             </p>
           </div>
         </div>
@@ -277,8 +288,8 @@ export default function UploadPage() {
         <div className="card duplicate-alert-card mb-6">
           <AlertTriangle className="w-6 h-6 text-amber flex-shrink-0" />
           <div>
-            <h4 className="font-bold text-amber-900">Duplicate File Warning</h4>
-            <p className="text-sm text-amber-800 mb-3">{duplicateAlert.message}</p>
+            <h4 className="font-bold text-amber-900 font-display">Duplicate File Detected</h4>
+            <p className="text-sm text-amber-800 mb-3 font-mono">{duplicateAlert.message}</p>
             {duplicateAlert.existingPaperId && (
               <Link href={`/papers/${duplicateAlert.existingPaperId}`} className="btn btn-secondary btn-sm">
                 View Existing Paper <ArrowRight className="w-3.5 h-3.5" />
@@ -289,17 +300,17 @@ export default function UploadPage() {
       )}
 
       {error && (
-        <div className="error-box mb-6">
+        <div className="error-box mb-6 font-mono">
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="upload-form-editorial">
+      <form onSubmit={handleSubmit} className="upload-form-editorial card">
         {/* Step 01 */}
         <div className="form-step-section mb-8">
-          <div className="step-header">
+          <div className="step-header font-mono">
             <span className="step-number">01</span>
-            <span className="step-title">PAPER FILE</span>
+            <span className="step-title font-display">DOCUMENT FILE</span>
           </div>
           <MultiFileUpload
             files={files}
@@ -312,9 +323,9 @@ export default function UploadPage() {
 
         {/* Step 02 */}
         <div className="form-step-section mb-8">
-          <div className="step-header">
+          <div className="step-header font-mono">
             <span className="step-number">02</span>
-            <span className="step-title">PAPER DETAILS</span>
+            <span className="step-title font-display">METADATA DETAILS</span>
           </div>
 
           <div className="form-group mb-4">
@@ -336,7 +347,7 @@ export default function UploadPage() {
                 required
                 value={subjectId}
                 onChange={(e) => setSubjectId(e.target.value)}
-                className="input-field"
+                className="input-field font-mono"
               >
                 {subjects.map((sub) => (
                   <option key={sub.id} value={sub.id}>
@@ -352,7 +363,7 @@ export default function UploadPage() {
                 required
                 value={examTypeId}
                 onChange={(e) => setExamTypeId(e.target.value)}
-                className="input-field"
+                className="input-field font-mono"
               >
                 {examTypes.map((exam) => (
                   <option key={exam.id} value={exam.id}>
@@ -369,7 +380,7 @@ export default function UploadPage() {
               <select
                 value={mbbsYear}
                 onChange={(e) => setMbbsYear(e.target.value)}
-                className="input-field"
+                className="input-field font-mono"
               >
                 <option value="1st MBBS">1st MBBS</option>
                 <option value="2nd MBBS">2nd MBBS</option>
@@ -383,7 +394,7 @@ export default function UploadPage() {
               <select
                 value={examYear}
                 onChange={(e) => setExamYear(e.target.value)}
-                className="input-field"
+                className="input-field font-mono"
               >
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
@@ -398,7 +409,7 @@ export default function UploadPage() {
               <select
                 value={examAttempt}
                 onChange={(e) => setExamAttempt(e.target.value as 'Main Examination' | 'Supplementary Examination')}
-                className="input-field"
+                className="input-field font-mono"
               >
                 <option value="Main Examination">Main Examination</option>
                 <option value="Supplementary Examination">Supplementary Examination</option>
@@ -407,10 +418,10 @@ export default function UploadPage() {
           </div>
 
           <div className="form-group mb-6">
-            <label className="form-label">Description / Topics (Optional)</label>
+            <label className="form-label">Description / Topics Covered (Optional)</label>
             <textarea
               rows={3}
-              placeholder="e.g. Long questions on Brachial Plexus injury..."
+              placeholder="e.g. Long questions on Brachial Plexus injury, Histology slides..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input-field"
@@ -425,20 +436,26 @@ export default function UploadPage() {
             className="btn btn-primary btn-lg w-full"
           >
             <Upload className="w-5 h-5" />
-            {submitting ? (statusMessage || 'Publishing Paper...') : 'Publish Question Paper'}
+            <span>{submitting ? (statusMessage || 'Publishing Paper...') : 'Publish Question Paper'}</span>
           </button>
         </div>
       </form>
 
       <style jsx>{`
         .max-w-3xl {
-          max-width: 800px;
+          max-width: 820px;
           margin-left: auto;
           margin-right: auto;
         }
 
         .upload-header {
-          margin-top: 1rem;
+          margin-top: 0.75rem;
+        }
+
+        .upload-form-editorial {
+          background-color: #FFFFFF;
+          border: var(--border-width-bold) solid var(--border-dark);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .step-header {
@@ -446,19 +463,29 @@ export default function UploadPage() {
           align-items: center;
           gap: 0.75rem;
           margin-bottom: 1rem;
+          padding-bottom: 0.5rem;
+          border-bottom: 1.5px solid var(--border-dark);
         }
 
         .step-number {
           font-family: var(--font-mono);
           font-size: 1.125rem;
-          font-weight: 700;
-          color: var(--primary-teal);
+          font-weight: 800;
+          color: #111827;
+          background-color: var(--primary-yellow);
+          border: 1px solid var(--border-dark);
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: var(--radius-sm);
         }
 
         .step-title {
-          font-size: 0.9375rem;
+          font-size: 1rem;
           font-weight: 800;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.04em;
           color: var(--text-primary);
         }
 
@@ -484,8 +511,8 @@ export default function UploadPage() {
         }
 
         .duplicate-alert-card {
-          background-color: #FFFBEB;
-          border: 1px solid #FDE68A;
+          background-color: var(--accent-amber-light);
+          border: 1.5px solid var(--accent-amber);
           display: flex;
           align-items: flex-start;
           gap: 1rem;
@@ -495,17 +522,11 @@ export default function UploadPage() {
         .error-box {
           background-color: var(--accent-rose-light);
           color: #9F1239;
+          border: 1.5px solid var(--accent-rose);
           padding: 0.875rem 1.25rem;
-          border-radius: var(--radius-md);
+          border-radius: var(--radius-sm);
           font-size: 0.9375rem;
           font-weight: 600;
-        }
-
-        .published-summary-box {
-          background-color: var(--bg-surface-subtle);
-          padding: 1rem;
-          border-radius: var(--radius-md);
-          font-size: 0.9375rem;
         }
 
         .w-full {
@@ -527,53 +548,51 @@ export default function UploadPage() {
 
         .method-card {
           background-color: #FFFFFF;
-          border: 2px solid var(--border-subtle);
-          border-radius: var(--radius-lg);
+          border: var(--border-width-bold) solid var(--border-dark);
+          border-radius: var(--radius-md);
           padding: 1.25rem;
           display: flex;
           align-items: center;
           gap: 1rem;
           cursor: pointer;
-          transition: all 0.15s ease;
+          transition: all 0.12s ease;
           text-decoration: none;
+          box-shadow: var(--shadow-brutalist-sm);
         }
 
         .method-card:hover {
-          border-color: var(--border-medium);
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-brutalist);
         }
 
         .primary-method-card {
-          border-color: var(--accent-highlight);
-          background-color: #F8FAFC;
-        }
-
-        .primary-method-card:hover {
-          border-color: #2563EB;
-          box-shadow: 0 4px 16px rgba(59, 130, 246, 0.12);
+          background-color: var(--primary-yellow-light);
+          border-color: var(--border-dark);
         }
 
         .method-card-active {
-          border-color: var(--primary-teal);
-          background-color: var(--primary-teal-light);
+          background-color: #FFFDF5;
+          box-shadow: var(--shadow-brutalist);
         }
 
         .method-icon-bubble {
           width: 48px;
           height: 48px;
-          border-radius: 12px;
+          border-radius: var(--radius-sm);
+          border: 1.5px solid var(--border-dark);
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          box-shadow: 1.5px 1.5px 0 var(--border-dark);
         }
 
         .primary-bubble {
-          background-color: var(--accent-highlight);
+          background-color: var(--primary-yellow);
         }
 
         .secondary-bubble {
-          background-color: #F1F5F9;
+          background-color: #FFFFFF;
         }
 
         .method-content {
@@ -594,22 +613,15 @@ export default function UploadPage() {
           color: var(--text-primary);
         }
 
-        .text-primary-blue {
-          color: #1D4ED8;
-        }
-
         .method-desc {
           font-size: 0.8125rem;
-          color: var(--text-muted);
+          color: var(--text-secondary);
           line-height: 1.35;
           margin-top: 0.15rem;
         }
 
-        :global(.badge-accent) {
-          background-color: #DBEAFE;
-          color: #1E40AF;
-          font-size: 0.6875rem;
-          padding: 0.15rem 0.4rem;
+        .text-dark {
+          color: #111827;
         }
 
         @media (max-width: 639px) {
@@ -617,22 +629,17 @@ export default function UploadPage() {
             margin-top: 0.5rem;
             margin-bottom: 1.25rem;
           }
-
           .method-card {
             padding: 1rem;
             gap: 0.75rem;
           }
-
           .method-icon-bubble {
             width: 40px;
             height: 40px;
-          }
-
-          .form-step-section {
-            margin-bottom: 1.5rem;
           }
         }
       `}</style>
     </div>
   );
 }
+

@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
     // 5. Binary Storage Upload to canonical path
     let storageUploaded = false;
     if (isSupabaseConfigured()) {
-      let { error: storageError } = await supabaseAdmin.storage
+      const { error: storageError } = await supabaseAdmin.storage
         .from('question-papers')
         .upload(storagePath, buffer, {
           contentType: firstFile.type || 'application/pdf',
