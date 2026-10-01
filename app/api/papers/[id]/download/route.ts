@@ -19,21 +19,28 @@ export async function GET(
       return NextResponse.json({ error: 'Question paper not found or unavailable' }, { status: 404 });
     }
 
-    // Increment metrics
-    await incrementDownloadCount(id);
+    const { searchParams } = new URL(request.url);
+    const isInline = searchParams.get('inline') === 'true' || searchParams.get('preview') === 'true';
+
+    // Increment metrics only on explicit download
+    if (!isInline) {
+      await incrementDownloadCount(id);
+    }
 
     // If Supabase Storage is configured and paper is stored in Supabase, generate signed URL
     if (isSupabaseConfigured() && paper.storage_path && !paper.storage_path.startsWith('mock/')) {
+      const options = isInline
+        ? undefined
+        : { download: paper.original_file_name || `${paper.title}.pdf` };
+
       const { data, error } = await supabaseAdmin.storage
         .from('question-papers')
-        .createSignedUrl(paper.storage_path, 3600, {
-          download: paper.original_file_name || `${paper.title}.pdf`,
-        });
+        .createSignedUrl(paper.storage_path, 3600, options);
 
       if (error || !data?.signedUrl) {
         console.error(`[PaperMD Storage Error] Signed URL generation failed for paper ${id} at path ${paper.storage_path}:`, error);
         return NextResponse.json(
-          { error: `Storage Access Error: Unable to generate secure download link for path "${paper.storage_path}".` },
+          { error: `Storage Access Error: Unable to generate secure link for path "${paper.storage_path}".` },
           { status: 500 }
         );
       }
@@ -45,13 +52,15 @@ export async function GET(
     if (process.env.NODE_ENV === 'development' && !isSupabaseConfigured()) {
       const pdfHeader = `%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R >>\nendobj\n4 0 obj\n<< /Length 120 >>\nstream\nBT\n/F1 18 Tf\n50 700 Td\n(PaperMD QUESTION PAPER: ${paper.title}) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000010 00000 n \n0000000060 00000 n \n0000000117 00000 n \n0000000212 00000 n \ntrailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n382\n%%EOF`;
 
+      const contentDisposition = isInline
+        ? 'inline'
+        : `attachment; filename="${encodeURIComponent(paper.original_file_name || `${paper.title}.pdf`)}"`;
+
       return new NextResponse(Buffer.from(pdfHeader), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="${encodeURIComponent(
-            paper.original_file_name || `${paper.title}.pdf`
-          )}"`,
+          'Content-Disposition': contentDisposition,
           'Cache-Control': 'no-cache',
         },
       });

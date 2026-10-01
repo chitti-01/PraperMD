@@ -55,7 +55,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
         {isPdf ? (
           <div className="pdf-embed-box" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}>
             <iframe
-              src={`/api/papers/${paper.id}/download#toolbar=0`}
+              src={`/api/papers/${paper.id}/download?inline=true#toolbar=0`}
               title={`Document Preview - ${paper.title}`}
               className="pdf-iframe"
             />
@@ -64,7 +64,7 @@ export default function PaperViewer({ paper }: PaperViewerProps) {
           <div className="image-preview-box" style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/papers/${paper.id}/download`}
+              src={`/api/papers/${paper.id}/download?inline=true`}
               alt={`${paper.title} Page ${currentSlide}`}
               className="scanned-doc-img"
               onError={(e) => {
