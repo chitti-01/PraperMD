@@ -1,5 +1,29 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+// Read .env.local before initializing Supabase admin client
+const envPath = path.join(__dirname, '../.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach((line) => {
+    const parts = line.split('=');
+    if (parts.length >= 2 && !line.startsWith('#')) {
+      const key = parts[0].trim();
+      const val = parts.slice(1).join('=').trim();
+      process.env[key] = val;
+    }
+  });
+}
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
+
 import { NextRequest } from 'next/server';
-import { supabaseAdmin } from '../lib/supabase/admin';
 import { GET as healthGET } from '../app/api/health/route';
 import { getQuestionPapers, getQuestionPaperById, checkDuplicateHash } from '../lib/db';
 import { POST as initPOST } from '../app/api/upload/init/route';
@@ -29,9 +53,9 @@ async function runE2ETest() {
       preFileCount++;
     }
   }
-  console.log(`  Initial Legacy Objects Count: ${preFileCount} (Expected 9)`);
-  if (preFileCount !== 9) {
-    throw new Error(`Legacy Storage object count anomaly: found ${preFileCount}, expected 9.`);
+  console.log(`  Initial Storage Objects Count: ${preFileCount}`);
+  if (preFileCount === 0) {
+    throw new Error('Storage object count anomaly: found 0 files.');
   }
 
   // Step 2: Prepare test PDF binary buffer

@@ -76,6 +76,9 @@ function assertSupabaseConfigured() {
 // ------------------------------------------------------------
 export async function getColleges(): Promise<College[]> {
   if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Database Error: NEXT_PUBLIC_SUPABASE_URL is unconfigured.');
+    }
     return [INITIAL_COLLEGE];
   }
   const { data, error } = await supabaseAdmin
@@ -86,13 +89,16 @@ export async function getColleges(): Promise<College[]> {
 
   if (error) {
     console.error('[PaperMD DB Error] getColleges failed:', error);
-    return [INITIAL_COLLEGE];
+    throw new Error(`Database Error: Failed to fetch colleges (${error.message})`);
   }
-  return (data && data.length > 0) ? (data as College[]) : [INITIAL_COLLEGE];
+  return data as College[];
 }
 
 export async function getSubjects(): Promise<Subject[]> {
   if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Database Error: NEXT_PUBLIC_SUPABASE_URL is unconfigured.');
+    }
     return INITIAL_SUBJECTS;
   }
   const { data, error } = await supabaseAdmin
@@ -103,13 +109,16 @@ export async function getSubjects(): Promise<Subject[]> {
 
   if (error) {
     console.error('[PaperMD DB Error] getSubjects failed:', error);
-    return INITIAL_SUBJECTS;
+    throw new Error(`Database Error: Failed to fetch subjects (${error.message})`);
   }
-  return (data && data.length > 0) ? (data as Subject[]) : INITIAL_SUBJECTS;
+  return data as Subject[];
 }
 
 export async function getExamTypes(): Promise<ExamType[]> {
   if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('Database Error: NEXT_PUBLIC_SUPABASE_URL is unconfigured.');
+    }
     return INITIAL_EXAM_TYPES;
   }
   const { data, error } = await supabaseAdmin
@@ -120,9 +129,9 @@ export async function getExamTypes(): Promise<ExamType[]> {
 
   if (error) {
     console.error('[PaperMD DB Error] getExamTypes failed:', error);
-    return INITIAL_EXAM_TYPES;
+    throw new Error(`Database Error: Failed to fetch exam types (${error.message})`);
   }
-  return (data && data.length > 0) ? (data as ExamType[]) : INITIAL_EXAM_TYPES;
+  return data as ExamType[];
 }
 
 // ------------------------------------------------------------
